@@ -1,0 +1,51 @@
+import { Link } from 'react-router-dom'
+import type { ArticlePreview } from '../../types/content'
+import { ImagePlaceholder } from './ImagePlaceholder'
+import { MetaRow } from './MetaRow'
+import { SectionLabel } from './SectionLabel'
+import { TagPill } from './TagPill'
+
+interface ArticleCardVerticalProps {
+  article: ArticlePreview
+}
+
+export function ArticleCardVertical({ article }: ArticleCardVerticalProps) {
+  return (
+    <Link
+      to={`/article/${article.slug}`}
+      className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/4 transition duration-200 hover:-translate-y-1 hover:border-white/20 hover:bg-white/6"
+    >
+      <div className="p-4">
+        <ImagePlaceholder
+          label={article.imageLabel}
+          aspectClassName="aspect-[16/10]"
+          accent={article.sectionTone === 'lavender' ? 'lavender' : 'coral'}
+        />
+      </div>
+      <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
+        <SectionLabel
+          index={article.sectionIndex}
+          label={article.section}
+          tone={article.sectionTone}
+        />
+        <div className="space-y-3">
+          <h3 className="font-display text-2xl leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral">
+            {article.title}
+          </h3>
+          <p className="text-sm leading-6 text-white/66">{article.deck}</p>
+        </div>
+        <div className="mt-auto flex flex-wrap gap-2">
+          {article.tags.slice(0, 2).map((tag) => (
+            <TagPill key={tag}>{tag}</TagPill>
+          ))}
+        </div>
+        <MetaRow
+          author={article.author}
+          role={article.role}
+          publishedAt={article.publishedAt}
+          readTime={article.readTime}
+        />
+      </div>
+    </Link>
+  )
+}
