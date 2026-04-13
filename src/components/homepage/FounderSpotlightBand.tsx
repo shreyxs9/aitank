@@ -14,7 +14,7 @@ export function FounderSpotlightBand({ founders }: FounderSpotlightBandProps) {
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-lavender">
               Founder spotlight
             </p>
-            <h2 className="font-display text-4xl tracking-[-0.05em] text-white sm:text-5xl">
+            <h2 className="font-display text-4xl font-extrabold tracking-[-0.05em] text-white sm:text-5xl">
               Builders with strong opinions about the human layer.
             </h2>
           </div>

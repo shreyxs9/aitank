@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
 const navItems = [
-  { label: 'Home', to: '/' },
-  { label: 'Components', to: '/components' },
+  { label: 'Home', to: '/' }
+  // { label: 'Components', to: '/components' },
 ]
 
 export function Header() {
@@ -20,7 +20,7 @@ export function Header() {
             <span className="rounded-xl bg-lavender/90" />
           </div>
           <div>
-            <p className="font-display text-xl tracking-[-0.04em]">The Loop</p>
+            <p className="font-display text-xl font-black tracking-[-0.04em]">The Loop</p>
             <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/45">AI Tank Journal</p>
           </div>
         </Link>
@@ -55,11 +55,13 @@ export function Header() {
             </NavLink>
           ))}
           <a
-            href="#community"
+            href="https://aitank.ai"
+            target="_blank"
+            rel="noreferrer"
             onClick={() => setIsOpen(false)}
             className="rounded-full border border-coral/25 bg-coral/10 px-4 py-2 text-sm text-coral transition hover:bg-coral hover:text-white"
           >
-            Join community
+            Visit AI Tank website
           </a>
         </nav>
       </div>

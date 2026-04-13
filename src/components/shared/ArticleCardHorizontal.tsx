@@ -16,6 +16,9 @@ export function ArticleCardHorizontal({ article }: ArticleCardHorizontalProps) {
     >
       <ImagePlaceholder
         label={article.imageLabel}
+        src={article.imageSrc}
+        alt={article.imageAlt}
+        showLabel={false}
         aspectClassName="aspect-[16/10] sm:aspect-square"
         accent={article.sectionTone === 'lavender' ? 'lavender' : 'coral'}
       />
@@ -26,7 +29,7 @@ export function ArticleCardHorizontal({ article }: ArticleCardHorizontalProps) {
             label={article.section}
             tone={article.sectionTone}
           />
-          <h3 className="font-display text-2xl leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral">
+          <h3 className="font-display text-2xl font-bold leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral">
             {article.title}
           </h3>
           <p className="max-w-xl text-sm leading-6 text-white/66">{article.deck}</p>

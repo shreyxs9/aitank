@@ -5,8 +5,9 @@
   --color-navy: #352956;
   --color-coral: #ff7a5c;
   --color-lavender: #a388ee;
-  --font-sans: "Aptos", "Segoe UI", sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  --font-site: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-site);
+  --font-display: var(--font-site);
 }
 
 :root {
@@ -23,6 +24,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-family: var(--font-site);
 }
 
 body {
@@ -30,7 +32,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background: transparent;
-  font-family: var(--font-sans);
+  font-family: var(--font-site);
 }
 
 a {
@@ -39,12 +41,16 @@ a {
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
+  font-family: inherit;
 }
 
 #root {
   min-height: 100vh;
+  font-family: inherit;
 }
 
 ::selection {

@@ -18,6 +18,9 @@ export function ArticleCardVertical({ article }: ArticleCardVerticalProps) {
       <div className="p-4">
         <ImagePlaceholder
           label={article.imageLabel}
+          src={article.imageSrc}
+          alt={article.imageAlt}
+          showLabel={false}
           aspectClassName="aspect-[16/10]"
           accent={article.sectionTone === 'lavender' ? 'lavender' : 'coral'}
         />
@@ -29,7 +32,7 @@ export function ArticleCardVertical({ article }: ArticleCardVerticalProps) {
           tone={article.sectionTone}
         />
         <div className="space-y-3">
-          <h3 className="font-display text-2xl leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral">
+          <h3 className="font-display text-2xl font-bold leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral">
             {article.title}
           </h3>
           <p className="text-sm leading-6 text-white/66">{article.deck}</p>

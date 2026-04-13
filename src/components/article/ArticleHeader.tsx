@@ -16,7 +16,7 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
             label={article.section}
             tone={article.sectionTone}
           />
-          <h1 className="max-w-4xl font-display text-5xl leading-[0.95] tracking-[-0.06em] text-white sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-4xl font-display text-5xl font-black leading-[0.95] tracking-[-0.06em] text-white sm:text-6xl lg:text-7xl">
             {article.title}
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-white/68">{article.deck}</p>

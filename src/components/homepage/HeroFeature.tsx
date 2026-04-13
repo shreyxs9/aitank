@@ -27,7 +27,7 @@ export function HeroFeature({ article, issue }: HeroFeatureProps) {
           </div>
 
           <div className="space-y-5">
-            <h1 className="font-display text-5xl leading-[0.96] tracking-[-0.06em] text-white sm:text-6xl lg:text-7xl">
+            <h1 className="font-display text-5xl font-black leading-[0.96] tracking-[-0.06em] text-white sm:text-6xl lg:text-7xl">
               {article.title}
             </h1>
             <p className="max-w-2xl text-base leading-7 text-white/68 sm:text-lg">
@@ -74,6 +74,9 @@ export function HeroFeature({ article, issue }: HeroFeatureProps) {
         <div className="lg:justify-self-stretch">
           <ImagePlaceholder
             label={article.imageLabel}
+            src={article.imageSrc}
+            alt={article.imageAlt}
+            showLabel={false}
             aspectClassName="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] xl:aspect-[5/4]"
             accent="lavender"
           />

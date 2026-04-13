@@ -15,7 +15,7 @@ export function CommunityPulse({ title, description, items }: CommunityPulseProp
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-lavender">
               {title}
             </p>
-            <h2 className="font-display text-4xl tracking-[-0.05em] text-white sm:text-5xl">
+            <h2 className="font-display text-4xl font-extrabold tracking-[-0.05em] text-white sm:text-5xl">
               Join the conversations happening around the issue.
             </h2>
           </div>
@@ -33,6 +33,19 @@ export function CommunityPulse({ title, description, items }: CommunityPulseProp
               <p className="text-sm leading-6 text-white/72">{item.detail}</p>
             </article>
           ))}
+        </div>
+        <div className="mt-8 flex justify-center">
+          <a
+            href="https://aitank.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-lavender/40 bg-lavender/10 px-6 py-3 text-sm font-semibold text-lavender transition hover:bg-lavender/20"
+          >
+            Explore our AI Community
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2.5 7h9M7.5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </a>
         </div>
       </div>
     </section>

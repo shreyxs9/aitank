@@ -1,15 +1,17 @@
 import { Route, Routes } from 'react-router-dom'
+import { ScrollToTop } from './components/shared/ScrollToTop'
 import { ArticlePage } from './pages/ArticlePage'
-import { ComponentsPage } from './pages/ComponentsPage'
 import { HomePage } from './pages/HomePage'
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/article/:slug" element={<ArticlePage />} />
-      <Route path="/components" element={<ComponentsPage />} />
-    </Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/article/:slug" element={<ArticlePage />} />
+      </Routes>
+    </>
   )
 }
 

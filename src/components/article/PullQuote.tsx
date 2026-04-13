@@ -7,7 +7,7 @@ interface PullQuoteProps {
 export function PullQuote({ pullQuote }: PullQuoteProps) {
   return (
     <figure className="my-10 rounded-[1.75rem] border border-coral/14 bg-coral/6 p-6">
-      <blockquote className="font-display text-3xl leading-tight tracking-[-0.04em] text-white">
+      <blockquote className="font-display text-3xl font-bold leading-tight tracking-[-0.04em] text-white">
         "{pullQuote.quote}"
       </blockquote>
       {pullQuote.attribution ? (

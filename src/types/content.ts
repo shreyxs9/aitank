@@ -13,13 +13,31 @@ export interface ArticlePreview {
   readTime: string
   publishedAt: string
   imageLabel: string
+  imageSrc?: string
+  imageAlt?: string
   tags: string[]
   highlight?: string
+}
+
+export interface ArticleFigure {
+  src: string
+  alt: string
+  caption?: string
+}
+
+export interface ArticleCallout {
+  eyebrow?: string
+  title?: string
+  formula?: string
+  body: string[]
 }
 
 export interface ArticleBodySection {
   heading?: string
   paragraphs: string[]
+  bullets?: string[]
+  callout?: ArticleCallout
+  figures?: ArticleFigure[]
 }
 
 export interface PullQuoteData {
@@ -39,6 +57,7 @@ export interface Article extends ArticlePreview {
   pullQuote: PullQuoteData
   body: ArticleBodySection[]
   sidebar: SidebarCard[]
+  documentPages?: ArticleFigure[]
 }
 
 export interface FounderSpotlight {
