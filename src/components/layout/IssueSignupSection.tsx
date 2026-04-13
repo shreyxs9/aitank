@@ -15,14 +15,14 @@ export function IssueSignupSection() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,rgba(53,41,86,0.55),transparent)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_50%_110%,rgba(255,122,92,0.12),transparent)]" />
 
-      <div className="relative mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-24">
+      <div className="relative mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         {/* Eyebrow */}
         <p className="mb-5 text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-lavender">
           Monthly reminders
         </p>
 
         {/* Heading */}
-        <h2 className="mb-4 font-display text-4xl font-extrabold tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
+        <h2 className="mb-4 font-display text-3xl font-extrabold leading-tight tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
           Get a note when the next issue drops.
         </h2>
 

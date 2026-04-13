@@ -12,7 +12,7 @@ export function ArticleCardHorizontal({ article }: ArticleCardHorizontalProps) {
   return (
     <Link
       to={`/article/${article.slug}`}
-      className="group grid gap-5 rounded-[1.75rem] border border-white/10 bg-white/4 p-4 transition duration-200 hover:border-white/18 hover:bg-white/6 sm:grid-cols-[12rem,1fr]"
+      className="group grid gap-4 rounded-[1.75rem] border border-white/10 bg-white/4 p-4 transition duration-200 hover:border-white/18 hover:bg-white/6 sm:grid-cols-[12rem,1fr] sm:gap-5"
     >
       <ImagePlaceholder
         label={article.imageLabel}
@@ -29,7 +29,7 @@ export function ArticleCardHorizontal({ article }: ArticleCardHorizontalProps) {
             label={article.section}
             tone={article.sectionTone}
           />
-          <h3 className="font-display text-2xl font-bold leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral">
+          <h3 className="font-display text-xl font-bold leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral sm:text-2xl">
             {article.title}
           </h3>
           <p className="max-w-xl text-sm leading-6 text-white/66">{article.deck}</p>

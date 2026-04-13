@@ -19,12 +19,12 @@ export function ArticlePage() {
       <Header />
       <main>
         <section className="border-b border-white/10 bg-white/4">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-4 text-sm text-white/58 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-7xl flex-col items-start gap-2 px-4 py-3 text-xs text-white/58 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:px-6 sm:py-4 sm:text-sm lg:px-8">
             <Link to="/" className="transition hover:text-white">
               Back to issue
             </Link>
-            <span className="h-1 w-1 rounded-full bg-white/25" />
-            <p>
+            <span className="hidden h-1 w-1 rounded-full bg-white/25 sm:block" />
+            <p className="break-words">
               {article.breadcrumb.join(' / ')} <span className="text-coral">/ {article.title}</span>
             </p>
           </div>

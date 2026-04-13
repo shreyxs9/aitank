@@ -13,7 +13,7 @@ interface HeroFeatureProps {
 export function HeroFeature({ article, issue }: HeroFeatureProps) {
   return (
     <section className="border-b border-white/10 bg-navy/95">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-14 lg:px-8 lg:py-16">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 sm:py-12 lg:grid-cols-2 lg:items-center lg:gap-14 lg:px-8 lg:py-16">
         <div className="space-y-6 lg:max-w-[34rem]">
           <div className="space-y-3">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.34em] text-lavender">
@@ -27,10 +27,10 @@ export function HeroFeature({ article, issue }: HeroFeatureProps) {
           </div>
 
           <div className="space-y-5">
-            <h1 className="font-display text-5xl font-black leading-[0.96] tracking-[-0.06em] text-white sm:text-6xl lg:text-7xl">
+            <h1 className="font-display text-4xl font-black leading-[0.94] tracking-[-0.06em] text-white sm:text-5xl lg:text-7xl">
               {article.title}
             </h1>
-            <p className="max-w-2xl text-base leading-7 text-white/68 sm:text-lg">
+            <p className="max-w-2xl text-[0.95rem] leading-7 text-white/68 sm:text-lg">
               {article.deck}
             </p>
             {article.highlight ? (
@@ -55,16 +55,16 @@ export function HeroFeature({ article, issue }: HeroFeatureProps) {
             readTime={article.readTime}
           />
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               to={`/article/${article.slug}`}
-              className="rounded-full bg-coral px-5 py-3 text-sm font-medium text-white transition hover:bg-coral/90"
+              className="rounded-full bg-coral px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-coral/90"
             >
               Read story
             </Link>
             <a
               href="#issue"
-              className="rounded-full border border-white/12 bg-white/6 px-5 py-3 text-sm font-medium text-white/78 transition hover:border-white/18 hover:bg-white/10 hover:text-white"
+              className="rounded-full border border-white/12 bg-white/6 px-5 py-3 text-center text-sm font-medium text-white/78 transition hover:border-white/18 hover:bg-white/10 hover:text-white"
             >
               Explore issue
             </a>

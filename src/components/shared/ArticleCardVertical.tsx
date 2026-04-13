@@ -25,14 +25,14 @@ export function ArticleCardVertical({ article }: ArticleCardVerticalProps) {
           accent={article.sectionTone === 'lavender' ? 'lavender' : 'coral'}
         />
       </div>
-      <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
+      <div className="flex flex-1 flex-col gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
         <SectionLabel
           index={article.sectionIndex}
           label={article.section}
           tone={article.sectionTone}
         />
         <div className="space-y-3">
-          <h3 className="font-display text-2xl font-bold leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral">
+          <h3 className="font-display text-xl font-bold leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral sm:text-2xl">
             {article.title}
           </h3>
           <p className="text-sm leading-6 text-white/66">{article.deck}</p>

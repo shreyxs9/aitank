@@ -11,23 +11,27 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/85 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-3 text-white">
-          <div className="grid h-10 w-10 grid-cols-2 gap-1 rounded-2xl bg-white/6 p-1 ring-1 ring-white/12">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+        <Link to="/" className="flex min-w-0 items-center gap-3 text-white">
+          <div className="grid h-9 w-9 shrink-0 grid-cols-2 gap-1 rounded-2xl bg-white/6 p-1 ring-1 ring-white/12 sm:h-10 sm:w-10">
             <span className="rounded-xl bg-coral/90" />
             <span className="rounded-xl bg-white/90" />
             <span className="rounded-xl bg-white/90" />
             <span className="rounded-xl bg-lavender/90" />
           </div>
-          <div>
-            <p className="font-display text-xl font-black tracking-[-0.04em]">The Loop</p>
-            <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/45">AI Tank Journal</p>
+          <div className="min-w-0">
+            <p className="truncate font-display text-lg font-black tracking-[-0.04em] sm:text-xl">
+              The Loop
+            </p>
+            <p className="truncate text-[0.6rem] uppercase tracking-[0.28em] text-white/45 sm:text-[0.68rem] sm:tracking-[0.34em]">
+              AI Tank Journal
+            </p>
           </div>
         </Link>
 
         <button
           type="button"
-          className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/75 md:hidden"
+          className="shrink-0 rounded-full border border-white/10 px-4 py-2 text-sm text-white/75 md:hidden"
           onClick={() => setIsOpen((open) => !open)}
           aria-expanded={isOpen}
           aria-label="Toggle navigation"
@@ -59,7 +63,7 @@ export function Header() {
             target="_blank"
             rel="noreferrer"
             onClick={() => setIsOpen(false)}
-            className="rounded-full border border-coral/25 bg-coral/10 px-4 py-2 text-sm text-coral transition hover:bg-coral hover:text-white"
+            className="rounded-full border border-coral/25 bg-coral/10 px-4 py-2 text-center text-sm text-coral transition hover:bg-coral hover:text-white"
           >
             Visit AI Tank website
           </a>

@@ -13,12 +13,12 @@ export function SecondaryRow({ articles }: SecondaryRowProps) {
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-white/45">
             More from this issue
           </p>
-          <h2 className="font-display text-4xl font-extrabold tracking-[-0.05em] text-white sm:text-5xl">
+          <h2 className="font-display text-3xl font-extrabold leading-tight tracking-[-0.05em] text-white sm:text-5xl">
             A second row for tighter reads, field notes, and operator detail.
           </h2>
         </div>
       </div>
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         {articles.map((article) => (
           <ArticleCardHorizontal key={article.id} article={article} />
         ))}

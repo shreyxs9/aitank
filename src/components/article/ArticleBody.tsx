@@ -11,7 +11,7 @@ function FigureCard({ figure, compact = false }: { figure: ArticleFigure; compac
     <figure className="space-y-3">
       <a href={figure.src} target="_blank" rel="noreferrer" className="block">
         <div
-          className={`overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/96 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.18)] ${
+          className={`overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/96 p-2 shadow-[0_24px_80px_rgba(0,0,0,0.18)] sm:p-3 ${
             compact ? 'max-w-md' : ''
           }`}
         >
@@ -25,7 +25,7 @@ function FigureCard({ figure, compact = false }: { figure: ArticleFigure; compac
 
 export function ArticleBody({ article }: ArticleBodyProps) {
   return (
-    <article className="min-w-0 border-b border-white/10 px-4 py-10 sm:px-6 lg:px-0 lg:pr-10">
+    <article className="min-w-0 border-b border-white/10 px-4 py-8 sm:px-6 sm:py-10 lg:px-0 lg:pr-10">
       <div className="space-y-8">
         <figure className="space-y-4">
           <ImagePlaceholder
@@ -39,14 +39,14 @@ export function ArticleBody({ article }: ArticleBodyProps) {
           <figcaption className="text-sm text-white/45">{article.heroCaption}</figcaption>
         </figure>
 
-        <p className="font-display text-3xl font-extrabold leading-tight tracking-[-0.03em] text-white/92">
+        <p className="font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] text-white/92 sm:text-3xl">
           {article.intro}
         </p>
 
         {article.body.map((section, index) => (
           <section key={`${article.id}-section-${index}`} className="space-y-5">
             {section.heading ? (
-              <h2 className="font-display text-3xl font-extrabold tracking-[-0.04em] text-white">
+              <h2 className="font-display text-2xl font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-3xl">
                 {section.heading}
               </h2>
             ) : null}
@@ -66,14 +66,14 @@ export function ArticleBody({ article }: ArticleBodyProps) {
             ) : null}
 
             {section.callout ? (
-              <aside className="space-y-4 rounded-[1.5rem] border border-white/12 bg-white/5 p-6">
+              <aside className="space-y-4 rounded-[1.5rem] border border-white/12 bg-white/5 p-5 sm:p-6">
                 {section.callout.eyebrow ? (
                   <p className="text-[0.68rem] font-semibold uppercase tracking-[0.32em] text-coral">
                     {section.callout.eyebrow}
                   </p>
                 ) : null}
                 {section.callout.title ? (
-                  <h3 className="font-display text-2xl font-bold tracking-[-0.03em] text-white">
+                  <h3 className="font-display text-xl font-bold tracking-[-0.03em] text-white sm:text-2xl">
                     {section.callout.title}
                   </h3>
                 ) : null}

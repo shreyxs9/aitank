@@ -6,9 +6,9 @@ export function Footer() {
     <>
       <IssueSignupSection />
       <footer className="border-t border-white/10 bg-black/20">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr,1fr] lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr,1fr] lg:px-8 lg:py-12">
           <div className="space-y-4">
-            <p className="font-display text-3xl font-black tracking-[-0.04em] text-white">The Loop</p>
+            <p className="font-display text-2xl font-black tracking-[-0.04em] text-white sm:text-3xl">The Loop</p>
             <p className="max-w-xl text-sm leading-6 text-white/62">
               A free editorial front page for the people building, reviewing, and living
               with applied AI. Open access, sharper context.
