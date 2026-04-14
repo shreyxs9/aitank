@@ -29,7 +29,7 @@ export function ArticleCardHorizontal({ article }: ArticleCardHorizontalProps) {
             label={article.section}
             tone={article.sectionTone}
           />
-          <h3 className="font-display text-xl font-bold leading-tight tracking-[-0.03em] text-white transition group-hover:text-coral sm:text-2xl">
+          <h3 className="editorial-heading font-display text-xl font-bold leading-tight text-white transition group-hover:text-coral sm:text-2xl">
             {article.title}
           </h3>
           <p className="max-w-xl text-sm leading-6 text-white/66">{article.deck}</p>

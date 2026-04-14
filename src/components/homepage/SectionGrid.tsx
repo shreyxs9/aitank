@@ -13,7 +13,7 @@ export function SectionGrid({ articles }: SectionGridProps) {
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-coral">
             Editorial sections
           </p>
-          <h2 className="font-display text-3xl font-extrabold leading-tight tracking-[-0.05em] text-white sm:text-5xl">
+          <h2 className="editorial-heading font-display text-3xl font-extrabold leading-tight text-white sm:text-5xl">
             An editorial grid that reads like a magazine, not a feed.
           </h2>
         </div>

@@ -53,6 +53,10 @@ select {
   font-family: inherit;
 }
 
+.editorial-heading {
+  letter-spacing: 0.5px;
+}
+
 ::selection {
   background: rgba(255, 122, 92, 0.35);
   color: #ffffff;

@@ -15,7 +15,7 @@ export function CommunityPulse({ title, description, items }: CommunityPulseProp
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-lavender">
               {title}
             </p>
-            <h2 className="font-display text-3xl font-extrabold leading-tight tracking-[-0.05em] text-white sm:text-5xl">
+            <h2 className="editorial-heading font-display text-3xl font-extrabold leading-tight text-white sm:text-5xl">
               Join the conversations happening around the issue.
             </h2>
           </div>

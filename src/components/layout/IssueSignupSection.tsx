@@ -1,12 +1,51 @@
 import { useState } from 'react'
 
+const kitPublicApiKey = import.meta.env.VITE_KIT_PUBLIC_API_KEY
+const kitFormId = import.meta.env.VITE_KIT_FORM_ID
+
 export function IssueSignupSection() {
   const [email, setEmail] = useState('')
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setHasSubmitted(true)
+
+    try {
+      setIsSubmitting(true)
+      setErrorMessage(null)
+
+      if (!kitPublicApiKey || !kitFormId) {
+        setErrorMessage('Kit signup is not configured yet.')
+        return
+      }
+
+      const response = await fetch(`https://api.convertkit.com/v3/forms/${kitFormId}/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          api_key: kitPublicApiKey,
+          email,
+        }),
+      })
+
+      const payload = (await response.json()) as { error?: string; message?: string }
+
+      if (!response.ok) {
+        setErrorMessage(payload.error ?? payload.message ?? 'Unable to save your email right now.')
+        return
+      }
+
+      setHasSubmitted(true)
+      setEmail('')
+    } catch {
+      setErrorMessage('Unable to reach the signup service right now.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -22,7 +61,7 @@ export function IssueSignupSection() {
         </p>
 
         {/* Heading */}
-        <h2 className="mb-4 font-display text-3xl font-extrabold leading-tight tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
+        <h2 className="editorial-heading mb-4 font-display text-3xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl">
           Get a note when the next issue drops.
         </h2>
 
@@ -54,15 +93,23 @@ export function IssueSignupSection() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="your@email.com"
               className="min-w-0 flex-1 rounded-full border border-white/12 bg-white/6 px-5 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-coral/50 focus:bg-white/10"
+              disabled={isSubmitting}
             />
             <button
               type="submit"
-              className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition hover:bg-coral/88 active:scale-95"
+              className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition hover:bg-coral/88 active:scale-95 disabled:cursor-not-allowed disabled:bg-coral/60 disabled:active:scale-100"
+              disabled={isSubmitting}
             >
-              Notify me
+              {isSubmitting ? 'Sending...' : 'Notify me'}
             </button>
           </form>
         )}
+
+        {errorMessage ? (
+          <p className="mt-4 text-sm text-coral">
+            {errorMessage}
+          </p>
+        ) : null}
 
         <p className="mt-5 text-xs text-white/32">
           No spam. Unsubscribe any time.

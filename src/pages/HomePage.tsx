@@ -24,7 +24,7 @@ export function HomePage() {
         <HeroFeature article={featuredArticle} issue={issueSummary} />
         <SectionGrid articles={editorialGridArticles} />
         <FounderSpotlightBand founders={founders} />
-        <SecondaryRow articles={secondaryRowArticles} />
+        {secondaryRowArticles.length > 0 ? <SecondaryRow articles={secondaryRowArticles} /> : null}
         <CommunityPulse
           title={communityPulse.title}
           description={communityPulse.description}

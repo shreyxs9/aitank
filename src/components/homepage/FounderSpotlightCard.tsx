@@ -13,7 +13,7 @@ export function FounderSpotlightCard({ founder }: FounderSpotlightCardProps) {
           {founder.startup.charAt(0)}
         </div>
         <div className="min-w-0 space-y-1">
-          <h3 className="font-display text-xl font-bold tracking-[-0.04em] text-white sm:text-2xl">{founder.startup}</h3>
+          <h3 className="editorial-heading font-display text-xl font-bold text-white sm:text-2xl">{founder.startup}</h3>
           <p className="text-sm text-lavender">
             {founder.founder}, {founder.role}
           </p>

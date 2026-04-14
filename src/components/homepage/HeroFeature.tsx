@@ -27,7 +27,7 @@ export function HeroFeature({ article, issue }: HeroFeatureProps) {
           </div>
 
           <div className="space-y-5">
-            <h1 className="font-display text-4xl font-black leading-[0.94] tracking-[-0.06em] text-white sm:text-5xl lg:text-7xl">
+            <h1 className="editorial-heading font-display text-4xl font-black leading-[0.94] text-white sm:text-5xl lg:text-7xl">
               {article.title}
             </h1>
             <p className="max-w-2xl text-[0.95rem] leading-7 text-white/68 sm:text-lg">

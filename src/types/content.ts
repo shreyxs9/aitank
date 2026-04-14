@@ -1,4 +1,5 @@
 export type SectionTone = 'coral' | 'lavender' | 'white'
+export type ArticleLayout = 'editorial' | 'document-pages'
 
 export interface ArticlePreview {
   id: string
@@ -51,6 +52,7 @@ export interface SidebarCard {
 }
 
 export interface Article extends ArticlePreview {
+  layout?: ArticleLayout
   breadcrumb: string[]
   intro: string
   heroCaption: string

@@ -13,7 +13,7 @@ export function SecondaryRow({ articles }: SecondaryRowProps) {
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-white/45">
             More from this issue
           </p>
-          <h2 className="font-display text-3xl font-extrabold leading-tight tracking-[-0.05em] text-white sm:text-5xl">
+          <h2 className="editorial-heading font-display text-3xl font-extrabold leading-tight text-white sm:text-5xl">
             A second row for tighter reads, field notes, and operator detail.
           </h2>
         </div>

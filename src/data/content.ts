@@ -131,59 +131,10 @@ export const articles: Article[] = [
     ],
   },
   {
-    id: 'briefing-deck',
-    slug: 'three-shifts-teams-are-planning-around',
-    section: 'Briefing deck',
-    sectionIndex: '02',
-    sectionTone: 'white',
-    title: 'Three shifts AI teams are already planning around',
-    deck:
-      'A concise read on procurement pressure, evaluation discipline, and why smaller teams are rebuilding their operating systems around better data loops.',
-    author: 'Mira Balan',
-    role: 'Analysis',
-    readTime: '5 min read',
-    publishedAt: 'April 8, 2026',
-    imageLabel: 'Planning board with release notes',
-    tags: ['Strategy', 'Operations', 'Benchmarks'],
-    breadcrumb: ['Issue 001', 'Briefing deck'],
-    intro:
-      'The teams shipping with confidence are not the loudest. They are the ones quietly improving how decisions move between research, product, and operations.',
-    heroCaption: 'A planning wall tracking product bets, data debt, and evaluation gaps.',
-    pullQuote: {
-      quote:
-        'Momentum in AI is less about speed in isolation and more about how quickly a team can learn from the last model mistake.',
-    },
-    body: [
-      {
-        paragraphs: [
-          'Procurement teams are asking harder questions, not just about model performance, but about traceability and update discipline. Buyers want to know what changed, why it changed, and who can explain the tradeoff.',
-          'At the same time, internal evaluation habits are getting stricter. Teams that once celebrated benchmark gains now expect scenario testing, human review, and clearer thresholds before rollout.',
-        ],
-      },
-      {
-        heading: 'Where founders are focusing',
-        paragraphs: [
-          'The strongest operators are narrowing scope. They are choosing one workflow, one buyer, and one measurable advantage instead of trying to impress every stakeholder at once.',
-          'That discipline shows up in roadmap planning, where the best teams reserve time for dataset repair and feedback loops instead of treating them as cleanup work after launch.',
-        ],
-      },
-    ],
-    sidebar: [
-      {
-        title: 'Key signals',
-        items: ['Evaluation maturity', 'Procurement scrutiny', 'Focused product scope'],
-      },
-      {
-        title: 'Related reads',
-        items: ['Operator roles', 'Field notes', 'Founder spotlight'],
-      },
-    ],
-  },
-  {
     id: 'signal-essay',
     slug: 'why-data-annotation-became-fintechs-trust-engine',
     section: 'Signal essay',
-    sectionIndex: '03',
+    sectionIndex: '02',
     sectionTone: 'lavender',
     title: "Why Data Annotation Became Fintech's Trust Engine",
     deck:
@@ -377,130 +328,22 @@ export const articles: Article[] = [
     ],
   },
   {
-    id: 'operator-role',
-    slug: 'what-an-ai-red-teamer-does-all-week',
-    section: 'Operator role',
-    sectionIndex: '04',
-    sectionTone: 'white',
-    title: 'What an AI red-teamer actually does all week',
-    deck:
-      'A grounded look at the role that sits between model ambition and production reality.',
-    author: 'Sana Verghese',
-    role: 'Role spotlight',
-    readTime: '4 min read',
-    publishedAt: 'April 8, 2026',
-    imageLabel: 'Testing matrix and prompt review grid',
-    tags: ['Red teaming', 'Safety', 'Roles'],
-    breadcrumb: ['Issue 001', 'Operator role'],
-    intro:
-      'Red-team work is not theatre. It is an operating function for teams that want to catch brittle assumptions before customers do.',
-    heroCaption: 'An active review board tracking scenarios, failures, and severity levels.',
-    pullQuote: {
-      quote: 'The best red-teamers are translators between risk language and product decisions.',
-    },
-    body: [
-      {
-        paragraphs: [
-          'A red-teamer spends less time inventing cinematic edge cases than most people think. The real work is building durable scenario sets, documenting failure patterns, and making those findings legible to product leads.',
-          'When that loop is healthy, launch decisions get calmer. When it is absent, teams mistake surprise for innovation.',
-        ],
-      },
-    ],
-    sidebar: [
-      {
-        title: 'Related themes',
-        items: ['Testing discipline', 'Scenario design', 'Decision hygiene'],
-      },
-    ],
-  },
-  {
-    id: 'field-notes',
-    slug: 'field-notes-from-bengaluru-founder-chats',
-    section: 'Field notes',
-    sectionIndex: '05',
-    sectionTone: 'coral',
-    title: 'Field notes from a week of founder conversations',
-    deck:
-      'Patterns from operator-heavy startups: where they are finding traction, where they are still overfitting, and what they wish more investors understood.',
-    author: 'The Loop',
-    role: 'Notebook',
-    readTime: '7 min read',
-    publishedAt: 'April 8, 2026',
-    imageLabel: 'Founder meetup and notebook spread',
-    tags: ['Founders', 'Bengaluru', 'Applied AI'],
-    breadcrumb: ['Issue 001', 'Field notes'],
-    intro:
-      'Some of the clearest signals in AI are still picked up in side conversations after a meetup, once the demo slides are closed.',
-    heroCaption: 'Candid conversations after an AI Tank session in Bengaluru.',
-    pullQuote: {
-      quote:
-        'The founders building durable products are unusually specific about the workflow pain they are eliminating.',
-    },
-    body: [
-      {
-        paragraphs: [
-          'Across conversations this month, the same pattern surfaced repeatedly: teams are doing better when they narrow the buyer, simplify the first deployment, and learn from one painful workflow deeply.',
-          'There is still plenty of hype in the room, but the operators with traction sound less like futurists and more like editors.',
-        ],
-      },
-    ],
-    sidebar: [
-      {
-        title: 'Session themes',
-        items: ['Workflow specificity', 'Better onboarding', 'Operational credibility'],
-      },
-    ],
-  },
-  {
-    id: 'toolchain',
-    slug: 'the-tools-teams-kept-recommending',
-    section: 'Toolchain',
-    sectionIndex: '06',
-    sectionTone: 'lavender',
-    title: 'The toolchain teams kept recommending this month',
-    deck:
-      'A practical row of evaluation, collaboration, and workflow tools worth trying without turning your stack into a museum.',
-    author: 'Kiran Bose',
-    role: 'Tooling',
-    readTime: '3 min read',
-    publishedAt: 'April 8, 2026',
-    imageLabel: 'Tool dashboard collage',
-    tags: ['Tools', 'Evaluation', 'Workflows'],
-    breadcrumb: ['Issue 001', 'Toolchain'],
-    intro:
-      'The best tools this month were not flashy. They removed drag from work people were already doing.',
-    heroCaption: 'A pared-back dashboard view of the tools operators kept sending to each other.',
-    pullQuote: {
-      quote: 'Good tooling disappears into the team rhythm and makes judgment easier to preserve.',
-    },
-    body: [
-      {
-        paragraphs: [
-          'The recommendations that came up repeatedly all shared one trait: they improved visibility. Teams want to see failure cases faster, route notes cleanly, and keep review work from vanishing into chat threads.',
-        ],
-      },
-    ],
-    sidebar: [
-      {
-        title: 'Inside the stack',
-        items: ['Review boards', 'Prompt logging', 'Dataset QA', 'Session recaps'],
-      },
-    ],
-  },
-  {
     id: 'strategy-brief',
     slug: 'data-annotation-tool-platform-or-human-in-the-loop',
     section: 'Strategy brief',
-    sectionIndex: '07',
+    sectionIndex: '03',
     sectionTone: 'white',
     title: 'Data Annotation: Tool, Platform, or Human in the Loop?',
     deck:
       'Chetan Bhambri argues that the most consequential AI decisions are often made before any model is chosen, in the definitions, category structures, and escalation rules that shape what the system learns.',
     author: 'Chetan Bhambri',
-    role: 'Leadership · Data & AI Strategy',
+    role: 'Founder, UinLEAD',
     readTime: '6 min read',
     publishedAt: 'April 11, 2026',
-    imageLabel: 'Editorial placeholder for annotation governance and human review',
+    imageLabel: 'Human annotator reviewing computer vision labels at a workstation',
+    imageSrc: '/articles/strategy-brief/cover.png',
+    imageAlt:
+      'A human annotator at a desk reviewing bounding-box labels on a computer vision dataset across dual monitors.',
     tags: ['Leadership', 'Governance', 'Human in the loop'],
     highlight:
       'The brief is not a formality. It is the first model decision, made before a single label is applied.',
@@ -508,7 +351,7 @@ export const articles: Article[] = [
     intro:
       'Every AI model an organisation uses has already been shaped by human judgment, and the real question is whether that judgment was clear enough to trust when scaled across the business.',
     heroCaption:
-      'This document did not include embedded images, so the story uses the site’s editorial visual treatment while preserving the full text argument.',
+      'Cover image showing a human annotator at work, reinforcing the article focus on human judgment inside AI systems.',
     pullQuote: {
       quote:
         'The annotators had done their job. The problem was never downstream.',
@@ -569,7 +412,7 @@ export const articles: Article[] = [
       {
         heading: 'About Chetan Bhambri',
         paragraphs: [
-          'Chetan Bhambri is described in the document as a leadership strategist and founder of UinLEAD, working with leaders navigating complex role and scale transitions.',
+          'Chetan Bhambri is Founder, UinLEAD.',
           'After three decades in global enterprises and high-growth organisations, he now partners with founders and senior leaders to strengthen how they think, decide, and build, especially as AI reshapes the systems their businesses run on.',
         ],
       },
@@ -618,7 +461,7 @@ export const articles: Article[] = [
     id: 'beta-training',
     slug: 'hermes-agent-beta-training-and-the-next-annotation-shift',
     section: 'Beta training',
-    sectionIndex: '08',
+    sectionIndex: '04',
     sectionTone: 'lavender',
     title: 'The New Hermes Agent Is Quietly Changing How AI Adapts To The Real World',
     deck:
@@ -776,7 +619,7 @@ export const articles: Article[] = [
     id: 'policy-essay',
     slug: 'data-annotation-powers-modern-ai',
     section: 'Policy essay',
-    sectionIndex: '09',
+    sectionIndex: '05',
     sectionTone: 'white',
     title: 'Data Annotation Powers Modern AI',
     deck:
@@ -785,7 +628,10 @@ export const articles: Article[] = [
     role: 'Policy adviser on tech and defence',
     readTime: '8 min read',
     publishedAt: 'April 13, 2026',
-    imageLabel: 'Editorial placeholder for annotation labor, policy, and AI infrastructure',
+    imageLabel: 'Illustrated map of how annotated data powers modern AI systems',
+    imageSrc: '/articles/data-annotation-powers-modern-ai/cover.jpeg',
+    imageAlt:
+      'An illustrated infographic showing labeled images, tagged text, audio transcripts, and machine learning models powering modern artificial intelligence.',
     tags: ['Policy', 'India', 'Annotation labor'],
     highlight:
       'Data annotation is not glamorous, but it is the soil in which modern AI models grow.',
@@ -793,7 +639,7 @@ export const articles: Article[] = [
     intro:
       'Every time a self-driving car recognizes a stop sign, a chatbot answers in fluent prose, or a moderation system flags a harmful image, human labeling work sits somewhere beneath that result.',
     heroCaption:
-      'No source images were provided with this article, so it uses the site’s editorial visual treatment.',
+      'Cover image illustrating how annotated data flows into computer vision, speech recognition, chatbots, and other AI systems.',
     pullQuote: {
       quote:
         'Fair compensation, worker wellbeing, and annotator diversity are not peripheral concerns. They are quality variables.',
@@ -879,6 +725,91 @@ export const articles: Article[] = [
       },
     ],
   },
+  {
+    id: 'ai-ops-skillset',
+    slug: 'building-ai-is-easy-making-it-work-is-hard',
+    section: 'Career brief',
+    sectionIndex: '06',
+    sectionTone: 'coral',
+    title: 'Building AI Is Easy. Making It Work Is Hard.',
+    deck:
+      'Benz Paul frames AI Ops and data annotation as the layer where enterprise AI either becomes reliable in the real world or breaks under messy data, weak context, and operational drift.',
+    author: 'Benz Paul',
+    role: 'Founder, QuantivX and AI Decoder Academy',
+    readTime: '5 min read',
+    publishedAt: 'April 13, 2026',
+    imageLabel: 'First page of the Benz Paul AI Ops article',
+    imageSrc: '/articles/ai-ops-skillset/page-1.png',
+    imageAlt:
+      'The opening page of the article Building AI Is Easy. Making It Work Is Hard.',
+    tags: ['AI Ops', 'Data annotation', 'Careers'],
+    highlight:
+      'The future will not belong to those who simply use AI, but to those who can teach it, correct it, and make it work.',
+    layout: 'document-pages',
+    breadcrumb: ['Issue 001', 'Career brief'],
+    intro:
+      'This article is presented from the source document pages so the original first page and the requested visual layouts are preserved inside the article view.',
+    heroCaption:
+      'This story uses the original document pages instead of the standard editorial hero treatment.',
+    pullQuote: {
+      quote:
+        'The future will not belong to those who simply use AI, but to those who can teach it, correct it, and make it work.',
+      attribution: 'Benz Paul',
+    },
+    body: [
+      {
+        heading: 'About the author',
+        paragraphs: [
+          'Benz Paul is an AI transformation expert and Founder of QuantivX and AI Decoder Academy, specializing in AI Ops, data annotation, and real-world AI deployment.',
+          'With over two decades of enterprise experience, he mentors students and professionals to build practical careers in the evolving AI ecosystem.',
+        ],
+      },
+    ],
+    sidebar: [
+      {
+        title: 'Core argument',
+        items: [
+          'Strong models still fail when data quality and context break down.',
+          'AI Ops is the operational layer that keeps AI reliable after the model is built.',
+          'Data annotation is applied intelligence, not mechanical labeling.',
+        ],
+      },
+      {
+        title: 'What AI Ops covers',
+        items: [
+          'Preparing and refining data',
+          'Ensuring accuracy and consistency',
+          'Monitoring performance, cost, and continuous improvement',
+        ],
+      },
+      {
+        title: 'Career signal',
+        items: [
+          'Interpret context beyond what is visible',
+          'Judge edge cases without a single obvious answer',
+          'Bridge technology decisions with business outcomes',
+        ],
+      },
+    ],
+    documentPages: [
+      {
+        src: '/articles/ai-ops-skillset/page-1.png',
+        alt: 'Page 1 of the Benz Paul AI Ops article.',
+      },
+      {
+        src: '/articles/ai-ops-skillset/page-2.png',
+        alt: 'Page 2 of the Benz Paul AI Ops article showing the AI Ops industry shift visual.',
+      },
+      {
+        src: '/articles/ai-ops-skillset/page-3.png',
+        alt: 'Page 3 of the Benz Paul AI Ops article about data annotation.',
+      },
+      {
+        src: '/articles/ai-ops-skillset/page-4.png',
+        alt: 'Page 4 of the Benz Paul AI Ops article about the emerging skillset.',
+      },
+    ],
+  },
 ]
 
 const getArticleById = (id: string) => {
@@ -892,20 +823,28 @@ const getArticleById = (id: string) => {
 }
 
 const pickArticles = (ids: string[]) => ids.map(getArticleById)
+const shuffleArticles = <T,>(items: T[]) => {
+  const shuffled = [...items]
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]]
+  }
+
+  return shuffled
+}
 
 export const featuredArticle = getArticleById('cover-story')
-export const editorialGridArticles = pickArticles([
-  'briefing-deck',
-  'signal-essay',
-  'operator-role',
-  'beta-training',
-])
-export const secondaryRowArticles = pickArticles([
-  'strategy-brief',
-  'policy-essay',
-  'field-notes',
-  'toolchain',
-])
+export const editorialGridArticles = shuffleArticles(
+  pickArticles([
+    'signal-essay',
+    'beta-training',
+    'strategy-brief',
+    'policy-essay',
+    'ai-ops-skillset',
+  ]),
+)
+export const secondaryRowArticles = shuffleArticles<Article>([])
 
 export const founders: FounderSpotlight[] = [
   {
