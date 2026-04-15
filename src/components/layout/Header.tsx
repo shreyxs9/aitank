@@ -24,7 +24,7 @@ export function Header() {
               The Loop
             </p>
             <p className="truncate text-[0.6rem] uppercase tracking-[0.28em] text-white/45 sm:text-[0.68rem] sm:tracking-[0.34em]">
-              AI Tank Journal
+              AI Tank Magazine
             </p>
           </div>
         </Link>
