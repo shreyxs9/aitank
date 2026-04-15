@@ -5,6 +5,7 @@ interface ImagePlaceholderProps {
   src?: string
   alt?: string
   showLabel?: boolean
+  imageClassName?: string
 }
 
 export function ImagePlaceholder({
@@ -14,6 +15,7 @@ export function ImagePlaceholder({
   src,
   alt,
   showLabel = !src,
+  imageClassName = 'object-cover',
 }: ImagePlaceholderProps) {
   return (
     <div
@@ -22,7 +24,7 @@ export function ImagePlaceholder({
       }`}
     >
       {src ? (
-        <img src={src} alt={alt ?? label} className="h-full w-full object-cover" loading="lazy" />
+        <img src={src} alt={alt ?? label} className={`h-full w-full ${imageClassName}`} loading="lazy" />
       ) : (
         <>
           <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:2.75rem_2.75rem]" />

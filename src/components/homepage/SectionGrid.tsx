@@ -22,8 +22,12 @@ export function SectionGrid({ articles }: SectionGridProps) {
         </p>
       </div>
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        {articles.map((article) => (
-          <SectionArticleCard key={article.id} article={article} />
+        {articles.map((article, index) => (
+          <SectionArticleCard
+            key={article.id}
+            article={article}
+            displayIndex={String(index + 2).padStart(2, '0')}
+          />
         ))}
       </div>
     </section>

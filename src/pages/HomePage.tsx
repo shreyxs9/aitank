@@ -21,7 +21,7 @@ export function HomePage() {
       <Header />
       <main>
         <IssueStrip issue={issueSummary} />
-        <HeroFeature article={featuredArticle} issue={issueSummary} />
+        <HeroFeature article={featuredArticle} issue={issueSummary} displayIndex="01" />
         <SectionGrid articles={editorialGridArticles} />
         <FounderSpotlightBand founders={founders} />
         {secondaryRowArticles.length > 0 ? <SecondaryRow articles={secondaryRowArticles} /> : null}

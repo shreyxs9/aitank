@@ -834,9 +834,9 @@ const shuffleArticles = <T,>(items: T[]) => {
   return shuffled
 }
 
-export const featuredArticle = getArticleById('cover-story')
-export const editorialGridArticles = shuffleArticles(
+const homepageArticlePool = shuffleArticles(
   pickArticles([
+    'cover-story',
     'signal-essay',
     'beta-training',
     'strategy-brief',
@@ -844,6 +844,9 @@ export const editorialGridArticles = shuffleArticles(
     'ai-ops-skillset',
   ]),
 )
+
+export const featuredArticle = homepageArticlePool[0]
+export const editorialGridArticles = homepageArticlePool.slice(1)
 export const secondaryRowArticles = shuffleArticles<Article>([])
 
 export const founders: FounderSpotlight[] = [

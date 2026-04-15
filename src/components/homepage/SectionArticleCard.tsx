@@ -3,8 +3,9 @@ import { ArticleCardVertical } from '../shared/ArticleCardVertical'
 
 interface SectionArticleCardProps {
   article: ArticlePreview
+  displayIndex?: string
 }
 
-export function SectionArticleCard({ article }: SectionArticleCardProps) {
-  return <ArticleCardVertical article={article} />
+export function SectionArticleCard({ article, displayIndex }: SectionArticleCardProps) {
+  return <ArticleCardVertical article={article} displayIndex={displayIndex} />
 }

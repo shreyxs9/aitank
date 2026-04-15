@@ -7,9 +7,13 @@ import { TagPill } from './TagPill'
 
 interface ArticleCardVerticalProps {
   article: ArticlePreview
+  displayIndex?: string
 }
 
-export function ArticleCardVertical({ article }: ArticleCardVerticalProps) {
+export function ArticleCardVertical({
+  article,
+  displayIndex = article.sectionIndex,
+}: ArticleCardVerticalProps) {
   return (
     <Link
       to={`/article/${article.slug}`}
@@ -27,7 +31,7 @@ export function ArticleCardVertical({ article }: ArticleCardVerticalProps) {
       </div>
       <div className="flex flex-1 flex-col gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
         <SectionLabel
-          index={article.sectionIndex}
+          index={displayIndex}
           label={article.section}
           tone={article.sectionTone}
         />

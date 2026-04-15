@@ -8,9 +8,10 @@ import { TagPill } from '../shared/TagPill'
 interface HeroFeatureProps {
   article: Article
   issue: IssueSummary
+  displayIndex?: string
 }
 
-export function HeroFeature({ article, issue }: HeroFeatureProps) {
+export function HeroFeature({ article, issue, displayIndex = article.sectionIndex }: HeroFeatureProps) {
   return (
     <section className="border-b border-white/10 bg-navy/95">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 sm:py-12 lg:grid-cols-2 lg:items-center lg:gap-14 lg:px-8 lg:py-16">
@@ -20,7 +21,7 @@ export function HeroFeature({ article, issue }: HeroFeatureProps) {
               Issue {issue.issueNumber} . {issue.releaseDate}
             </p>
             <SectionLabel
-              index={article.sectionIndex}
+              index={displayIndex}
               label={article.section}
               tone={article.sectionTone}
             />
@@ -79,6 +80,7 @@ export function HeroFeature({ article, issue }: HeroFeatureProps) {
             showLabel={false}
             aspectClassName="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] xl:aspect-[5/4]"
             accent="lavender"
+            imageClassName="object-contain object-center sm:object-cover"
           />
         </div>
       </div>

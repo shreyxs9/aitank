@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import logo from '../../assets/aitank-logo-light.png'
 
 const navItems = [
   { label: 'Home', to: '/' }
@@ -13,12 +14,11 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         <Link to="/" className="flex min-w-0 items-center gap-3 text-white">
-          <div className="grid h-9 w-9 shrink-0 grid-cols-2 gap-1 rounded-2xl bg-white/6 p-1 ring-1 ring-white/12 sm:h-10 sm:w-10">
-            <span className="rounded-xl bg-coral/90" />
-            <span className="rounded-xl bg-white/90" />
-            <span className="rounded-xl bg-white/90" />
-            <span className="rounded-xl bg-lavender/90" />
-          </div>
+          <img
+            src={logo}
+            alt="AI Tank logo"
+            className="h-11 w-auto shrink-0 sm:h-12"
+          />
           <div className="min-w-0">
             <p className="truncate font-display text-lg font-black tracking-[-0.04em] sm:text-xl">
               The Loop
