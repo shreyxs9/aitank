@@ -19,10 +19,10 @@ export function FounderSpotlightBand({ founders }: FounderSpotlightBandProps) {
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-6 text-white/62">
-            Short founder portraits from the teams turning process discipline into product
-            advantage.
+            Short founder portraits from the teams turning process discipline into product advantage.
           </p>
         </div>
+
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {founders.map((founder) => (
             <FounderSpotlightCard key={founder.id} founder={founder} />
