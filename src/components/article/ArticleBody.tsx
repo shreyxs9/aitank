@@ -1,9 +1,11 @@
 import type { Article, ArticleBodySection, ArticleFigure } from '../../types/content'
 import { ImagePlaceholder } from '../shared/ImagePlaceholder'
 import { PullQuote } from './PullQuote'
+import { Link } from 'react-router-dom'
 
 interface ArticleBodyProps {
   article: Article
+  previewOnly?: boolean
 }
 
 function FigureCard({ figure, compact = false }: { figure: ArticleFigure; compact?: boolean }) {
@@ -340,7 +342,77 @@ function BodySection({
   )
 }
 
-export function ArticleBody({ article }: ArticleBodyProps) {
+export function ArticleBody({ article, previewOnly = false }: ArticleBodyProps) {
+  if (previewOnly) {
+    const previewSections = article.body.slice(0, 1).map((section) => ({
+      ...section,
+      paragraphs: section.paragraphs.slice(0, 2),
+      bullets: section.bullets?.slice(0, 3),
+    }))
+
+    return (
+      <article className="min-w-0 border-b border-white/10 px-4 py-8 sm:px-6 sm:py-10 lg:px-0 lg:pr-10">
+        <div className="space-y-8">
+          <figure className="space-y-4">
+            <ImagePlaceholder
+              label={article.imageLabel}
+              src={article.imageSrc}
+              alt={article.imageAlt}
+              showLabel={false}
+              aspectClassName="aspect-[16/9]"
+              accent={article.sectionTone === 'lavender' ? 'lavender' : 'coral'}
+            />
+            <figcaption className="text-sm text-white/45">{article.heroCaption}</figcaption>
+          </figure>
+
+          <p className="editorial-heading font-display text-2xl font-extrabold leading-tight text-white/92 sm:text-3xl">
+            {article.intro}
+          </p>
+
+          {previewSections.map((section, index) => (
+            <BodySection
+              key={`${article.id}-preview-${index}`}
+              article={article}
+              section={section}
+              index={index}
+              showPullQuote={index === 0}
+            />
+          ))}
+
+          <section className="relative overflow-hidden rounded-[1.75rem] border border-coral/25 bg-white/4 p-6 sm:p-8">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink via-ink/80 to-transparent" />
+            <div className="relative space-y-4">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.32em] text-coral">
+                Continue reading
+              </p>
+              <h2 className="font-display text-2xl font-black tracking-[-0.04em] text-white sm:text-3xl">
+                Login to read the full article.
+              </h2>
+              <p className="max-w-2xl text-sm leading-7 text-white/64 sm:text-base">
+                Sign in to access the complete story, publish your own articles, and manage drafts
+                from your contributor workspace.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to="/login"
+                  className="rounded-full bg-coral px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-[#ff8c72]"
+                >
+                  Login to continue
+                </Link>
+                <Link
+                  to="/"
+                  className="rounded-full border border-white/10 px-5 py-3 text-center text-sm text-white/72 transition hover:bg-white/6 hover:text-white"
+                >
+                  Back to homepage
+                </Link>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+    )
+  }
+
   if (article.id === 'ai-ops-skillset') {
     return <AiOpsSkillsetLayout article={article} />
   }

@@ -2,7 +2,6 @@ import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
 import { IssueStrip } from '../components/layout/IssueStrip'
 import { CommunityPulse } from '../components/homepage/CommunityPulse'
-import { FounderSpotlightBand } from '../components/homepage/FounderSpotlightBand'
 import { HeroFeature } from '../components/homepage/HeroFeature'
 import { SecondaryRow } from '../components/homepage/SecondaryRow'
 import { SectionGrid } from '../components/homepage/SectionGrid'
@@ -10,7 +9,6 @@ import {
   communityPulse,
   editorialGridArticles,
   featuredArticle,
-  founders,
   issueSummary,
   secondaryRowArticles,
 } from '../data/content'
@@ -23,7 +21,6 @@ export function HomePage() {
         <IssueStrip issue={issueSummary} />
         <HeroFeature article={featuredArticle} issue={issueSummary} displayIndex="01" />
         <SectionGrid articles={editorialGridArticles} />
-        <FounderSpotlightBand founders={founders} />
         {secondaryRowArticles.length > 0 ? <SecondaryRow articles={secondaryRowArticles} /> : null}
         <CommunityPulse
           title={communityPulse.title}

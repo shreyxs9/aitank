@@ -1,18 +1,83 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { ArticleBody } from '../components/article/ArticleBody'
 import { ArticleHeader } from '../components/article/ArticleHeader'
 import { ArticleSidebar } from '../components/article/ArticleSidebar'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
 import { getArticleBySlug } from '../data/content'
+import { communityArticleToEditorialArticle } from '../lib/articleTransforms'
+import { fetchCommunityArticleBySlug } from '../lib/communityArticles'
+import type { Article } from '../types/content'
+import { useAuth } from '../components/auth/useAuth'
 
 export function ArticlePage() {
   const { slug } = useParams()
-  const article = slug ? getArticleBySlug(slug) : undefined
+  const { user } = useAuth()
+  const [article, setArticle] = useState<Article | undefined>(() =>
+    slug ? getArticleBySlug(slug) : undefined,
+  )
+  const [isLoading, setIsLoading] = useState(Boolean(slug && !getArticleBySlug(slug)))
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadArticle() {
+      if (!slug) {
+        setArticle(undefined)
+        setIsLoading(false)
+        return
+      }
+
+      const localArticle = getArticleBySlug(slug)
+
+      if (localArticle) {
+        setArticle(localArticle)
+        setIsLoading(false)
+        return
+      }
+
+      setIsLoading(true)
+
+      try {
+        const communityArticle = await fetchCommunityArticleBySlug(slug)
+
+        if (!cancelled) {
+          setArticle(
+            communityArticle ? communityArticleToEditorialArticle(communityArticle) : undefined,
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadArticle()
+
+    return () => {
+      cancelled = true
+    }
+  }, [slug])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto flex min-h-[50vh] max-w-7xl items-center justify-center px-4 text-sm text-white/62 sm:px-6 lg:px-8">
+          Loading article...
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   if (!article) {
     return <Navigate to="/" replace />
   }
+
+  const previewOnly = !user
 
   return (
     <div className="min-h-screen">
@@ -33,7 +98,7 @@ export function ArticlePage() {
         <ArticleHeader article={article} />
 
         <div className="mx-auto grid max-w-7xl gap-0 lg:grid-cols-[minmax(0,1fr),20rem] lg:px-8">
-          <ArticleBody article={article} />
+          <ArticleBody article={article} previewOnly={previewOnly} />
           <ArticleSidebar article={article} />
         </div>
       </main>

@@ -36,7 +36,7 @@ export function CommunityPulse({ title, description, items }: CommunityPulseProp
         </div>
         <div className="mt-8 flex justify-center">
           <a
-            href="https://aitank.in"
+            href="https://aitank.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-lavender/40 bg-lavender/10 px-6 py-3 text-sm font-semibold text-lavender transition hover:bg-lavender/20 sm:w-auto"

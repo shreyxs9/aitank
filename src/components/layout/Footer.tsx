@@ -22,6 +22,15 @@ export function Footer() {
               <Link to="/" className="block text-sm text-white/72 transition hover:text-white">
                 Current issue
               </Link>
+              <Link to="/write" className="block text-sm text-white/72 transition hover:text-white">
+                Write article
+              </Link>
+              <Link
+                to="/my-articles"
+                className="block text-sm text-white/72 transition hover:text-white"
+              >
+                My articles
+              </Link>
             </div>
             <div className="space-y-3">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-white/45">

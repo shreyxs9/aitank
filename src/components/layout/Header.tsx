@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import logo from '../../assets/aitank-logo-light.png'
+import { useAuth } from '../auth/useAuth'
 
 const navItems = [
-  { label: 'Home', to: '/' }
-  // { label: 'Components', to: '/components' },
+  { label: 'Home', to: '/' },
+  { label: 'Write', to: '/write' },
+  { label: 'My Articles', to: '/my-articles' },
 ]
 
 function WhatsAppIcon() {
@@ -22,6 +24,12 @@ function WhatsAppIcon() {
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const { profile, signOut, user } = useAuth()
+
+  async function handleSignOut() {
+    await signOut()
+    setIsOpen(false)
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/85 backdrop-blur-xl">
@@ -71,6 +79,34 @@ export function Header() {
               {item.label}
             </NavLink>
           ))}
+          {user ? (
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+              <div className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/72">
+                {profile?.displayName || user.email}
+              </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/72 transition hover:bg-white/6 hover:text-white"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <NavLink
+              to="/login"
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `rounded-full border px-4 py-2 text-sm transition ${
+                  isActive
+                    ? 'border-coral/40 bg-coral/14 text-coral'
+                    : 'border-white/10 text-white/72 hover:bg-white/6 hover:text-white'
+                }`
+              }
+            >
+              Login
+            </NavLink>
+          )}
           <a
             href="https://chat.whatsapp.com/H76HPaLrz478jOwepDCkYj"
             target="_blank"
