@@ -22,6 +22,7 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
           <p className="max-w-3xl text-base leading-7 text-white/68 sm:text-lg sm:leading-8">{article.deck}</p>
           <MetaRow
             author={article.author}
+            authorAvatarUrl={article.authorAvatarUrl}
             role={article.role}
             publishedAt={article.publishedAt}
             readTime={article.readTime}

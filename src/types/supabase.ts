@@ -9,6 +9,24 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      app_admins: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           author_id: string
@@ -20,7 +38,7 @@ export interface Database {
           published_at: string | null
           section: string
           slug: string
-          status: 'draft' | 'published'
+          status: 'draft' | 'pending_review' | 'published' | 'rejected'
           tags: string[]
           title: string
           updated_at: string
@@ -35,7 +53,7 @@ export interface Database {
           published_at?: string | null
           section?: string
           slug: string
-          status?: 'draft' | 'published'
+          status?: 'draft' | 'pending_review' | 'published' | 'rejected'
           tags?: string[]
           title: string
           updated_at?: string
@@ -50,7 +68,7 @@ export interface Database {
           published_at?: string | null
           section?: string
           slug?: string
-          status?: 'draft' | 'published'
+          status?: 'draft' | 'pending_review' | 'published' | 'rejected'
           tags?: string[]
           title?: string
           updated_at?: string
@@ -62,6 +80,7 @@ export interface Database {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          designation: string | null
           display_name: string | null
           id: string
           updated_at: string
@@ -71,6 +90,7 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          designation?: string | null
           display_name?: string | null
           id: string
           updated_at?: string
@@ -80,6 +100,7 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          designation?: string | null
           display_name?: string | null
           id?: string
           updated_at?: string
@@ -89,7 +110,36 @@ export interface Database {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      admin_fetch_review_articles: {
+        Args: {
+          admin_password: string
+        }
+        Returns: Array<
+          Database['public']['Tables']['articles']['Row'] & {
+            author_avatar_url: string | null
+            author_designation: string | null
+            author_display_name: string | null
+            author_username: string | null
+          }
+        >
+      }
+      admin_update_article_review_status: {
+        Args: {
+          admin_password: string
+          article_id: string
+          next_status: 'published' | 'rejected'
+        }
+        Returns: Array<
+          Database['public']['Tables']['articles']['Row'] & {
+            author_avatar_url: string | null
+            author_designation: string | null
+            author_display_name: string | null
+            author_username: string | null
+          }
+        >
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

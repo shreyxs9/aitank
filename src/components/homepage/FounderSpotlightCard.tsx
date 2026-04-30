@@ -9,14 +9,20 @@ export function FounderSpotlightCard({ founder }: FounderSpotlightCardProps) {
   return (
     <article className="flex h-full flex-col rounded-[1.75rem] border border-lavender/18 bg-white/5 p-4 transition duration-200 hover:-translate-y-1 hover:border-lavender/35 hover:bg-white/8 sm:p-5">
       <div className="mb-5 flex items-start gap-3 sm:gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/8 text-lg font-semibold text-lavender sm:h-14 sm:w-14 sm:text-xl">
-          {founder.startup.charAt(0)}
-        </div>
+        {founder.imageSrc ? (
+          <img
+            src={founder.imageSrc}
+            alt={founder.imageAlt ?? founder.founder}
+            className="h-16 w-16 shrink-0 rounded-2xl border border-white/10 object-cover sm:h-20 sm:w-20"
+          />
+        ) : (
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/8 text-lg font-semibold text-lavender sm:h-20 sm:w-20 sm:text-xl">
+            {founder.founder.charAt(0)}
+          </div>
+        )}
         <div className="min-w-0 space-y-1">
-          <h3 className="editorial-heading font-display text-xl font-bold text-white sm:text-2xl">{founder.startup}</h3>
-          <p className="text-sm text-lavender">
-            {founder.founder}, {founder.role}
-          </p>
+          <h3 className="editorial-heading font-display text-xl font-bold text-white sm:text-2xl">{founder.founder}</h3>
+          <p className="text-sm leading-5 text-lavender">{founder.role}</p>
         </div>
       </div>
       <p className="mb-5 text-base leading-7 text-white/78">"{founder.quote}"</p>

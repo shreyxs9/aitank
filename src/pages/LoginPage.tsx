@@ -1,10 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
 import { SupabaseNotice } from '../components/shared/SupabaseNotice'
 import { useAuth } from '../components/auth/useAuth'
 import { supabase } from '../lib/supabase'
+import {
+  normalizeWhitespace,
+  validateDesignation,
+  validateDisplayName,
+  validateEmail,
+  validatePassword,
+  validateProfileImageFile,
+} from '../lib/validation'
+import { updateProfileDetails, uploadProfilePicture } from '../lib/communityArticles'
 
 type AuthMode = 'login' | 'signup'
 
@@ -16,9 +25,30 @@ export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const [designation, setDesignation] = useState('')
+  const [profilePicture, setProfilePicture] = useState<File | null>(null)
+  const [profilePicturePreview, setProfilePicturePreview] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      if (profilePicturePreview) {
+        URL.revokeObjectURL(profilePicturePreview)
+      }
+    }
+  }, [profilePicturePreview])
+
+  function setSelectedProfilePicture(file: File | null) {
+    if (profilePicturePreview) {
+      URL.revokeObjectURL(profilePicturePreview)
+    }
+
+    setProfilePicture(file)
+    setProfilePicturePreview(file ? URL.createObjectURL(file) : null)
+    setError(null)
+  }
 
   if (user) {
     return <Navigate to={from} replace />
@@ -36,9 +66,26 @@ export function LoginPage() {
     setMessage(null)
 
     try {
+      const normalizedEmail = email.trim().toLowerCase()
+      const normalizedDisplayName = normalizeWhitespace(displayName)
+      const normalizedDesignation = normalizeWhitespace(designation)
+      const validationError =
+        validateEmail(normalizedEmail) ||
+        validatePassword(password) ||
+        (mode === 'signup'
+          ? validateDisplayName(normalizedDisplayName) ||
+            validateDesignation(normalizedDesignation) ||
+            (profilePicture ? validateProfileImageFile(profilePicture) : null)
+          : null)
+
+      if (validationError) {
+        setError(validationError)
+        return
+      }
+
       if (mode === 'login') {
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
+          email: normalizedEmail,
           password,
         })
 
@@ -48,12 +95,13 @@ export function LoginPage() {
 
         setMessage('Signed in. Redirecting...')
       } else {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: normalizedEmail,
           password,
           options: {
             data: {
-              display_name: displayName || email.split('@')[0],
+              designation: normalizedDesignation || null,
+              display_name: normalizedDisplayName || normalizedEmail.split('@')[0],
             },
           },
         })
@@ -62,7 +110,37 @@ export function LoginPage() {
           throw signUpError
         }
 
-        setMessage('Account created. Check your email if confirmation is enabled.')
+        if (signUpData.user && signUpData.session) {
+          let avatarUrl: string | null = null
+
+          if (profilePicture) {
+            avatarUrl = await uploadProfilePicture(signUpData.user.id, profilePicture)
+          }
+
+          const { error: metadataError } = await supabase.auth.updateUser({
+            data: {
+              avatar_url: avatarUrl,
+              designation: normalizedDesignation || null,
+              display_name: normalizedDisplayName || normalizedEmail.split('@')[0],
+            },
+          })
+
+          if (metadataError) {
+            throw metadataError
+          }
+
+          await updateProfileDetails(signUpData.user.id, {
+            avatarUrl,
+            designation: normalizedDesignation || null,
+            displayName: normalizedDisplayName || normalizedEmail.split('@')[0],
+          })
+        }
+
+        setMessage(
+          signUpData.session
+            ? 'Account created. Redirecting...'
+            : 'Account created. Check your email if confirmation is enabled.',
+        )
       }
     } catch (caughtError) {
       const nextError =
@@ -93,7 +171,7 @@ export function LoginPage() {
                 Write for The Loop with an author space that feels like the magazine.
               </h1>
               <p className="max-w-2xl text-base leading-8 text-white/64 sm:text-lg">
-                Writers can save drafts, publish free articles, and manage their own
+                Writers can save drafts, submit articles for review, and manage their own
                 submissions without any gated-reading flow. The front page stays open to
                 readers while contributors get a clean backstage to create.
               </p>
@@ -102,8 +180,8 @@ export function LoginPage() {
             <div className="grid gap-4 sm:grid-cols-3">
               {[
                 { title: 'Email auth', detail: 'Fast, direct sign-in for contributors.' },
-                { title: 'Own your drafts', detail: 'Track every piece from draft to publish.' },
-                { title: 'Publish free articles', detail: 'No paywalls, locks, or premium flags.' },
+                { title: 'Own your drafts', detail: 'Track every piece from draft to review.' },
+                { title: 'Submit for review', detail: 'Admins approve posts before they go public.' },
               ].map((item, index) => (
                 <div
                   key={item.title}
@@ -170,7 +248,7 @@ export function LoginPage() {
                   </h2>
                   <p className="mt-2 max-w-md text-sm leading-6 text-white/52">
                     {mode === 'login'
-                      ? 'Access drafts, publish new stories, and manage everything tied to your contributor profile.'
+                      ? 'Access drafts, submit new stories, and manage everything tied to your contributor profile.'
                       : 'Set up your account to start writing and publishing community pieces inside The Loop.'}
                   </p>
                 </div>
@@ -202,23 +280,100 @@ export function LoginPage() {
 
               <form className="space-y-5" onSubmit={handleSubmit}>
                 {mode === 'signup' ? (
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-white/72">Display name</span>
-                    <input
-                      value={displayName}
-                      onChange={(event) => setDisplayName(event.target.value)}
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
-                      placeholder="Your byline"
-                    />
-                  </label>
+                  <div className="space-y-5">
+                    <label className="block">
+                      <span className="mb-2 block text-sm font-medium text-white/72">Profile picture</span>
+                      <span
+                        className="flex cursor-pointer items-center gap-4 rounded-2xl border border-dashed border-white/16 bg-white/5 px-4 py-4 transition hover:border-coral/50 hover:bg-white/[0.07]"
+                        onDragOver={(event) => {
+                          event.preventDefault()
+                        }}
+                        onDrop={(event) => {
+                          event.preventDefault()
+                          setSelectedProfilePicture(event.dataTransfer.files?.[0] ?? null)
+                        }}
+                      >
+                        <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-black/30 text-xs font-semibold uppercase tracking-[0.18em] text-white/38">
+                          {profilePicturePreview ? (
+                            <img
+                              src={profilePicturePreview}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            'PFP'
+                          )}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium text-white/78">
+                            Drop or choose a JPG, PNG, or WebP
+                          </span>
+                          <span className="mt-1 block truncate text-xs text-white/42">
+                            {profilePicture ? profilePicture.name : 'Shown in your author section'}
+                          </span>
+                        </span>
+                        <input
+                          id="profile-picture"
+                          name="profilePicture"
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="sr-only"
+                          onChange={(event) => {
+                            setSelectedProfilePicture(event.target.files?.[0] ?? null)
+                          }}
+                        />
+                      </span>
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-2 block text-sm font-medium text-white/72">Display name</span>
+                      <input
+                        id="display-name"
+                        name="displayName"
+                        value={displayName}
+                        onChange={(event) => {
+                          setDisplayName(event.target.value)
+                          setError(null)
+                        }}
+                        autoComplete="name"
+                        maxLength={60}
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                        placeholder="Your byline"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-2 block text-sm font-medium text-white/72">Designation</span>
+                      <input
+                        id="designation"
+                        name="designation"
+                        value={designation}
+                        onChange={(event) => {
+                          setDesignation(event.target.value)
+                          setError(null)
+                        }}
+                        autoComplete="organization-title"
+                        maxLength={90}
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                        placeholder="Founder, AI researcher, product lead"
+                      />
+                    </label>
+                  </div>
                 ) : null}
 
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-white/72">Email</span>
                   <input
+                    id="email"
+                    name="email"
                     value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    onChange={(event) => {
+                      setEmail(event.target.value)
+                      setError(null)
+                    }}
                     type="email"
+                    autoComplete="email"
+                    maxLength={254}
                     required
                     className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
                     placeholder="you@example.com"
@@ -228,10 +383,17 @@ export function LoginPage() {
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-white/72">Password</span>
                   <input
+                    id="password"
+                    name="password"
                     value={password}
-                    onChange={(event) => setPassword(event.target.value)}
+                    onChange={(event) => {
+                      setPassword(event.target.value)
+                      setError(null)
+                    }}
                     type="password"
+                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     minLength={6}
+                    maxLength={128}
                     required
                     className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
                     placeholder="Minimum 6 characters"

@@ -5,16 +5,18 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { ensureProfile, getProfile } from '../../lib/communityArticles'
+import { ensureProfile, getAdminProfileByEmail, getProfile } from '../../lib/communityArticles'
 import { supabase } from '../../lib/supabase'
-import type { Profile } from '../../types/auth'
+import type { AdminProfile, Profile } from '../../types/auth'
 import { AuthContext, type AuthContextValue } from './AuthContext'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null)
   const [isLoading, setIsLoading] = useState(Boolean(supabase))
+  const [isAdminLoading, setIsAdminLoading] = useState(Boolean(supabase))
 
   async function refreshProfileForUser(nextUser: User | null) {
     if (!nextUser || !supabase) {
@@ -31,6 +33,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const ensuredProfile = await ensureProfile(nextUser).catch(() => null)
     setProfile(ensuredProfile)
+  }
+
+  async function refreshAdminForUser(nextUser: User | null) {
+    if (!nextUser || !supabase) {
+      setAdminProfile(null)
+      setIsAdminLoading(false)
+      return
+    }
+
+    setIsAdminLoading(true)
+    const nextAdminProfile = await getAdminProfileByEmail(nextUser.email).catch(() => null)
+    setAdminProfile(nextAdminProfile)
+    setIsAdminLoading(false)
   }
 
   useEffect(() => {
@@ -52,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session)
       setUser(data.session?.user ?? null)
       await refreshProfileForUser(data.session?.user ?? null)
+      await refreshAdminForUser(data.session?.user ?? null)
       setIsLoading(false)
     }
 
@@ -63,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(nextSession)
       setUser(nextSession?.user ?? null)
       void refreshProfileForUser(nextSession?.user ?? null)
+      void refreshAdminForUser(nextSession?.user ?? null)
       setIsLoading(false)
     })
 
@@ -74,9 +91,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
+      adminProfile,
       isConfigured: Boolean(supabase),
+      isAdmin: Boolean(adminProfile),
+      isAdminLoading,
       isLoading,
       profile,
+      refreshAdminProfile: async () => {
+        await refreshAdminForUser(user)
+      },
       refreshProfile: async () => {
         await refreshProfileForUser(user)
       },
@@ -90,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       user,
     }),
-    [isLoading, profile, session, user],
+    [adminProfile, isAdminLoading, isLoading, profile, session, user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

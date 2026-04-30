@@ -1,44 +1,37 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
 import { SupabaseNotice } from '../components/shared/SupabaseNotice'
-import { useAuth } from '../components/auth/useAuth'
-import { deleteCommunityArticle, fetchMyArticles } from '../lib/communityArticles'
+import { fetchAdminReviewArticles, updateArticleReviewStatus } from '../lib/communityArticles'
+import { HARDCODED_ADMIN_USERNAME, signOutHardcodedAdmin } from '../lib/adminAuth'
+import { supabase } from '../lib/supabase'
 import { validateUuid } from '../lib/validation'
 import type { CommunityArticle } from '../types/communityArticles'
 
-export function MyArticlesPage() {
-  const { isConfigured, user } = useAuth()
+export function AdminDashboardPage() {
+  const navigate = useNavigate()
   const [articles, setArticles] = useState<CommunityArticle[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [deletingArticleId, setDeletingArticleId] = useState<string | null>(null)
+  const [updatingArticleId, setUpdatingArticleId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const articleStats = useMemo(() => {
-    const published = articles.filter((article) => article.status === 'published').length
-    const inReview = articles.filter((article) => article.status === 'pending_review').length
-
-    return {
-      drafts: articles.filter((article) => article.status === 'draft').length,
-      inReview,
-      published,
+  const stats = useMemo(
+    () => ({
+      pending: articles.filter((article) => article.status === 'pending_review').length,
+      published: articles.filter((article) => article.status === 'published').length,
+      rejected: articles.filter((article) => article.status === 'rejected').length,
       total: articles.length,
-    }
-  }, [articles])
+    }),
+    [articles],
+  )
 
   useEffect(() => {
     let cancelled = false
 
     async function loadArticles() {
-      if (!user) {
-        setArticles([])
-        setIsLoading(false)
-        return
-      }
-
       try {
-        const nextArticles = await fetchMyArticles(user.id)
+        const nextArticles = await fetchAdminReviewArticles()
 
         if (!cancelled) {
           setArticles(nextArticles)
@@ -46,7 +39,7 @@ export function MyArticlesPage() {
       } catch (caughtError) {
         if (!cancelled) {
           const nextError =
-            caughtError instanceof Error ? caughtError.message : 'Failed to load your articles.'
+            caughtError instanceof Error ? caughtError.message : 'Failed to load review queue.'
           setError(nextError)
         }
       } finally {
@@ -61,45 +54,48 @@ export function MyArticlesPage() {
     return () => {
       cancelled = true
     }
-  }, [user])
+  }, [])
 
-  async function handleDelete(article: CommunityArticle) {
-    if (!user) {
-      setError('You need to be signed in to delete articles.')
-      return
-    }
-
-    const validationError = validateUuid(article.id, 'Article ID') || validateUuid(user.id, 'User ID')
+  async function handleReview(article: CommunityArticle, status: 'published' | 'rejected') {
+    const validationError =
+      validateUuid(article.id, 'Article ID') ||
+      (status !== 'published' && status !== 'rejected' ? 'Review status is invalid.' : null)
 
     if (validationError) {
       setError(validationError)
       return
     }
 
-    const confirmed = window.confirm(`Delete "${article.title}"? This cannot be undone.`)
-
-    if (!confirmed) {
+    if (article.status === status) {
+      setError(`Article is already ${status === 'published' ? 'approved' : 'rejected'}.`)
       return
     }
 
     setError(null)
-    setDeletingArticleId(article.id)
+    setUpdatingArticleId(article.id)
 
     try {
-      await deleteCommunityArticle(article.id, user.id)
+      const nextArticle = await updateArticleReviewStatus(article.id, status)
       setArticles((currentArticles) =>
-        currentArticles.filter((currentArticle) => currentArticle.id !== article.id),
+        currentArticles.map((currentArticle) =>
+          currentArticle.id === article.id ? nextArticle : currentArticle,
+        ),
       )
     } catch (caughtError) {
       const nextError =
-        caughtError instanceof Error ? caughtError.message : 'Failed to delete the article.'
+        caughtError instanceof Error ? caughtError.message : 'Failed to update article status.'
       setError(nextError)
     } finally {
-      setDeletingArticleId(null)
+      setUpdatingArticleId(null)
     }
   }
 
-  function formatArticleDate(date: string) {
+  function handleAdminSignOut() {
+    signOutHardcodedAdmin()
+    navigate('/admin/login', { replace: true })
+  }
+
+  function formatDate(date: string) {
     return new Intl.DateTimeFormat(undefined, {
       day: 'numeric',
       month: 'short',
@@ -109,15 +105,15 @@ export function MyArticlesPage() {
 
   function getStatusLabel(status: CommunityArticle['status']) {
     if (status === 'published') {
-      return 'Live'
-    }
-
-    if (status === 'pending_review') {
-      return 'In review'
+      return 'Approved'
     }
 
     if (status === 'rejected') {
       return 'Rejected'
+    }
+
+    if (status === 'pending_review') {
+      return 'Pending'
     }
 
     return 'Draft'
@@ -130,91 +126,74 @@ export function MyArticlesPage() {
         <section className="mb-8 grid gap-6 lg:grid-cols-[1fr,28rem] lg:items-end">
           <div className="space-y-4">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.32em] text-coral">
-              Publishing desk
+              Admin desk
             </p>
             <h1 className="max-w-4xl font-display text-4xl font-black tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
-              Manage drafts, review submissions, and published posts.
+              Review submissions before publication.
             </h1>
             <p className="max-w-3xl text-sm leading-7 text-white/62 sm:text-base">
-              Review article status, open live URLs, and keep the contributor queue tidy from one
-              workspace.
+              Signed in as {HARDCODED_ADMIN_USERNAME}. Pending posts stay out of the public homepage
+              until an admin approves them.
             </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-[1fr,auto] lg:grid-cols-1">
-            <div className="grid grid-cols-2 gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-center sm:grid-cols-4">
-              <div>
-                <p className="text-2xl font-black tracking-[-0.04em] text-white">
-                  {articleStats.total}
-                </p>
-                <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
-                  Total
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-black tracking-[-0.04em] text-white">
-                  {articleStats.inReview}
-                </p>
-                <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
-                  Review
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-black tracking-[-0.04em] text-white">
-                  {articleStats.drafts}
-                </p>
-                <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
-                  Drafts
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-black tracking-[-0.04em] text-white">
-                  {articleStats.published}
-                </p>
-                <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
-                  Live
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/write"
-              className="inline-flex items-center justify-center rounded-full border border-coral/25 bg-coral px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-[#ff8c72]"
+            <button
+              type="button"
+              onClick={handleAdminSignOut}
+              className="rounded-full border border-white/10 px-5 py-3 text-sm text-white/72 transition hover:bg-white/6 hover:text-white"
             >
-              Write new article
-            </Link>
+              Sign out admin
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-center sm:grid-cols-4">
+            <div>
+              <p className="text-2xl font-black tracking-[-0.04em] text-white">{stats.total}</p>
+              <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
+                Total
+              </p>
+            </div>
+            <div>
+              <p className="text-2xl font-black tracking-[-0.04em] text-white">{stats.pending}</p>
+              <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
+                Pending
+              </p>
+            </div>
+            <div>
+              <p className="text-2xl font-black tracking-[-0.04em] text-white">{stats.published}</p>
+              <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
+                Approved
+              </p>
+            </div>
+            <div>
+              <p className="text-2xl font-black tracking-[-0.04em] text-white">{stats.rejected}</p>
+              <p className="mt-1 text-[0.68rem] uppercase tracking-[0.16em] text-white/38">
+                Rejected
+              </p>
+            </div>
           </div>
         </section>
 
-        {!isConfigured ? (
+        {!supabase ? (
           <SupabaseNotice />
         ) : isLoading ? (
           <div className="rounded-[1.5rem] border border-white/10 bg-white/4 p-6 text-sm text-white/62">
-            Loading your articles...
+            Loading review queue...
           </div>
         ) : error ? (
           <div className="rounded-[1.5rem] border border-coral/30 bg-coral/10 p-6 text-sm text-coral">
             {error}
           </div>
         ) : articles.length === 0 ? (
-          <div className="grid gap-5 rounded-[2rem] border border-white/10 bg-white/4 p-6 sm:p-8 md:grid-cols-[1fr,auto] md:items-center">
-            <div>
-              <p className="text-xl font-bold tracking-[-0.03em] text-white">No articles yet</p>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/62">
-                Start with a draft, add the essentials, then submit it for admin review.
-              </p>
-            </div>
-            <Link
-              to="/write"
-              className="rounded-full border border-coral/25 bg-coral/10 px-5 py-3 text-center text-sm text-coral transition hover:bg-coral hover:text-white"
-            >
-              Create first draft
-            </Link>
+          <div className="rounded-[2rem] border border-white/10 bg-white/4 p-8">
+            <p className="text-xl font-bold tracking-[-0.03em] text-white">No submissions yet</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/62">
+              Submitted articles will appear here when contributors send them for review.
+            </p>
           </div>
         ) : (
           <div className="grid gap-4">
             {articles.map((article) => (
               <article
                 key={article.id}
-                className="grid gap-5 rounded-[1.5rem] border border-white/10 bg-white/4 p-4 transition hover:border-white/20 hover:bg-white/6 md:grid-cols-[11rem,1fr] md:p-5"
+                className="grid gap-5 rounded-[1.5rem] border border-white/10 bg-white/4 p-4 md:grid-cols-[12rem,1fr] md:p-5"
               >
                 <div className="overflow-hidden rounded-[1.1rem] border border-white/10 bg-white/5">
                   {article.coverImageUrl ? (
@@ -232,21 +211,19 @@ export function MyArticlesPage() {
 
                 <div className="min-w-0">
                   <div className="mb-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/40">
-                    <span>{article.section}</span>
+                    <span>{article.authorName}</span>
+                    <span>{formatDate(article.createdAt)}</span>
                     <span
                       className={`rounded-full border px-3 py-1 tracking-[0.16em] ${
                         article.status === 'published'
                           ? 'border-coral/30 bg-coral/12 text-coral'
-                          : article.status === 'pending_review'
-                            ? 'border-lavender/30 bg-lavender/12 text-lavender'
-                            : article.status === 'rejected'
-                              ? 'border-coral/25 bg-coral/8 text-coral'
-                              : 'border-white/10 bg-white/5 text-white/52'
+                          : article.status === 'rejected'
+                            ? 'border-white/10 bg-white/5 text-white/52'
+                            : 'border-lavender/30 bg-lavender/12 text-lavender'
                       }`}
                     >
                       {getStatusLabel(article.status)}
                     </span>
-                    <span>{formatArticleDate(article.createdAt)}</span>
                   </div>
                   <h2 className="text-2xl font-bold tracking-[-0.03em] text-white">
                     {article.title}
@@ -275,15 +252,23 @@ export function MyArticlesPage() {
                       to={`/article/${article.slug}`}
                       className="rounded-full border border-coral/25 bg-coral/10 px-4 py-2 text-sm text-coral transition hover:bg-coral hover:text-white"
                     >
-                      {article.status === 'published' ? 'Open live post' : 'Preview article'}
+                      Preview
                     </Link>
                     <button
                       type="button"
-                      onClick={() => void handleDelete(article)}
-                      disabled={deletingArticleId === article.id}
+                      onClick={() => void handleReview(article, 'published')}
+                      disabled={updatingArticleId === article.id || article.status === 'published'}
+                      className="rounded-full border border-[#7BFFB2]/25 bg-[#7BFFB2]/10 px-4 py-2 text-sm text-[#7BFFB2] transition hover:bg-[#7BFFB2] hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {updatingArticleId === article.id ? 'Updating...' : 'Approve'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleReview(article, 'rejected')}
+                      disabled={updatingArticleId === article.id || article.status === 'rejected'}
                       className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/54 transition hover:border-coral/30 hover:text-coral disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {deletingArticleId === article.id ? 'Deleting...' : 'Delete'}
+                      Reject
                     </button>
                   </div>
                 </div>

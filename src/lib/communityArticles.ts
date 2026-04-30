@@ -1,12 +1,49 @@
 import type { User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { slugify } from './slug'
+import { HARDCODED_ADMIN_PASSWORD } from './adminAuth'
+import {
+  normalizeWhitespace,
+  validateArticleBody,
+  validateArticleDeck,
+  validateArticleStatus,
+  validateDesignation,
+  validateDisplayName,
+  validateArticleTitle,
+  validateImageFile,
+  validateProfileImageFile,
+  validateTags,
+  validateUuid,
+} from './validation'
 import type { CommunityArticle, CommunityArticleDraft } from '../types/communityArticles'
 import type { Database } from '../types/supabase'
-import type { Profile } from '../types/auth'
+import type { AdminProfile, Profile } from '../types/auth'
 
+type AdminRow = Database['public']['Tables']['app_admins']['Row']
 type ArticleRow = Database['public']['Tables']['articles']['Row']
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
+type AdminReviewArticleRow = ArticleRow & {
+  author_avatar_url: string | null
+  author_designation: string | null
+  author_display_name: string | null
+  author_username: string | null
+}
+
+function getAdminRpcErrorMessage(error: { code?: string; message?: string }) {
+  if (error.code === 'PGRST202') {
+    return 'Admin review functions are missing in Supabase. Run supabase/schema.sql in the Supabase SQL editor, then reload the admin page.'
+  }
+
+  return error.message || 'Admin review request failed.'
+}
+
+function toAdminProfile(row: AdminRow): AdminProfile {
+  return {
+    id: row.id,
+    email: row.email,
+    createdAt: row.created_at,
+  }
+}
 
 function toProfile(row: ProfileRow): Profile {
   return {
@@ -15,6 +52,7 @@ function toProfile(row: ProfileRow): Profile {
     username: row.username,
     bio: row.bio,
     avatarUrl: row.avatar_url,
+    designation: row.designation,
   }
 }
 
@@ -22,6 +60,8 @@ function toCommunityArticle(article: ArticleRow, profile?: ProfileRow | null): C
   return {
     id: article.id,
     authorId: article.author_id,
+    authorAvatarUrl: profile?.avatar_url || null,
+    authorDesignation: profile?.designation || null,
     authorName:
       profile?.display_name || profile?.username || 'AI Tank contributor',
     body: article.body,
@@ -43,20 +83,30 @@ export async function ensureProfile(user: User) {
     return null
   }
 
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle()
+
   const payload = {
     id: user.id,
     display_name:
       typeof user.user_metadata.display_name === 'string'
         ? user.user_metadata.display_name
-        : null,
+        : existingProfile?.display_name ?? null,
     username:
       typeof user.user_metadata.user_name === 'string'
         ? user.user_metadata.user_name
-        : null,
+        : existingProfile?.username ?? null,
+    designation:
+      typeof user.user_metadata.designation === 'string'
+        ? user.user_metadata.designation
+        : existingProfile?.designation ?? null,
     avatar_url:
       typeof user.user_metadata.avatar_url === 'string'
         ? user.user_metadata.avatar_url
-        : null,
+        : existingProfile?.avatar_url ?? null,
   }
 
   const { data, error } = await supabase
@@ -66,7 +116,7 @@ export async function ensureProfile(user: User) {
     .single()
 
   if (error) {
-    throw error
+    throw new Error(getAdminRpcErrorMessage(error))
   }
 
   return toProfile(data)
@@ -75,6 +125,11 @@ export async function ensureProfile(user: User) {
 export async function getProfile(userId: string) {
   if (!supabase) {
     return null
+  }
+
+  const validationError = validateUuid(userId, 'User ID')
+  if (validationError) {
+    throw new Error(validationError)
   }
 
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
@@ -86,9 +141,114 @@ export async function getProfile(userId: string) {
   return toProfile(data)
 }
 
+export async function getAdminProfileByEmail(email: string | undefined | null) {
+  if (!supabase || !email) {
+    return null
+  }
+
+  const { data, error } = await supabase
+    .from('app_admins')
+    .select('*')
+    .eq('email', email.trim().toLowerCase())
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return data ? toAdminProfile(data) : null
+}
+
+export async function updateProfileDetails(
+  userId: string,
+  details: {
+    avatarUrl?: string | null
+    designation?: string | null
+    displayName?: string | null
+  },
+) {
+  if (!supabase) {
+    return null
+  }
+
+  const normalizedDesignation =
+    typeof details.designation === 'string' ? normalizeWhitespace(details.designation) : null
+  const normalizedDisplayName =
+    typeof details.displayName === 'string' ? normalizeWhitespace(details.displayName) : null
+  const validationError =
+    validateUuid(userId, 'User ID') ||
+    (normalizedDisplayName ? validateDisplayName(normalizedDisplayName) : null) ||
+    (normalizedDesignation ? validateDesignation(normalizedDesignation) : null)
+
+  if (validationError) {
+    throw new Error(validationError)
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      avatar_url: details.avatarUrl ?? null,
+      designation: normalizedDesignation,
+      display_name: normalizedDisplayName,
+    })
+    .eq('id', userId)
+    .select()
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return toProfile(data)
+}
+
+export async function uploadProfilePicture(userId: string, file: File) {
+  if (!supabase) {
+    throw new Error('Supabase is not configured.')
+  }
+
+  const validationError = validateUuid(userId, 'User ID') || validateProfileImageFile(file)
+  if (validationError) {
+    throw new Error(validationError)
+  }
+
+  const extension = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() : 'jpg'
+  const filePath = `${userId}/profile-${crypto.randomUUID()}.${extension || 'jpg'}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('profile-pictures')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    })
+
+  if (uploadError) {
+    throw new Error(`Profile picture upload failed: ${uploadError.message}`)
+  }
+
+  const { data } = supabase.storage.from('profile-pictures').getPublicUrl(filePath)
+
+  return data.publicUrl
+}
+
 export async function createCommunityArticle(authorId: string, draft: CommunityArticleDraft) {
   if (!supabase) {
     throw new Error('Supabase is not configured.')
+  }
+
+  const normalizedTitle = normalizeWhitespace(draft.title)
+  const normalizedDeck = normalizeWhitespace(draft.deck)
+  const normalizedBody = draft.body.trim()
+  const validationError =
+    validateUuid(authorId, 'Author ID') ||
+    validateArticleTitle(normalizedTitle) ||
+    validateArticleDeck(normalizedDeck) ||
+    validateTags(draft.tags) ||
+    validateArticleBody(normalizedBody) ||
+    validateArticleStatus(draft.status)
+
+  if (validationError) {
+    throw new Error(validationError)
   }
 
   const {
@@ -111,22 +271,23 @@ export async function createCommunityArticle(authorId: string, draft: CommunityA
     throw new Error(`Profile sync failed: ${details}`)
   }
 
-  const baseSlug = slugify(draft.title)
+  const baseSlug = slugify(normalizedTitle)
   const slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
+  const safeStatus = draft.status === 'pending_review' ? 'pending_review' : 'draft'
 
   const { data, error } = await supabase
     .from('articles')
     .insert({
       author_id: authorId,
-      body: draft.body,
+      body: normalizedBody,
       cover_image_url: draft.coverImageUrl || null,
-      deck: draft.deck,
-      published_at: draft.status === 'published' ? new Date().toISOString() : null,
+      deck: normalizedDeck,
+      published_at: null,
       section: draft.section,
       slug,
-      status: draft.status,
+      status: safeStatus,
       tags: draft.tags,
-      title: draft.title,
+      title: normalizedTitle,
     })
     .select()
     .single()
@@ -143,6 +304,7 @@ export async function createCommunityArticle(authorId: string, draft: CommunityA
       avatar_url: profile.avatarUrl,
       bio: profile.bio,
       created_at: '',
+      designation: profile.designation,
       display_name: profile.displayName,
       updated_at: '',
       username: profile.username,
@@ -153,6 +315,11 @@ export async function createCommunityArticle(authorId: string, draft: CommunityA
 export async function uploadArticleCoverImage(authorId: string, file: File) {
   if (!supabase) {
     throw new Error('Supabase is not configured.')
+  }
+
+  const validationError = validateUuid(authorId, 'Author ID') || validateImageFile(file)
+  if (validationError) {
+    throw new Error(validationError)
   }
 
   const extension = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() : 'jpg'
@@ -179,7 +346,12 @@ export async function fetchCommunityArticleBySlug(slug: string) {
     return null
   }
 
-  const { data, error } = await supabase.from('articles').select('*').eq('slug', slug).single()
+  const normalizedSlug = slug.trim().toLowerCase()
+  if (!/^[a-z0-9-]{3,180}$/.test(normalizedSlug)) {
+    return null
+  }
+
+  const { data, error } = await supabase.from('articles').select('*').eq('slug', normalizedSlug).single()
 
   if (error) {
     if (error.code === 'PGRST116') {
@@ -203,6 +375,11 @@ export async function fetchMyArticles(authorId: string) {
     return []
   }
 
+  const validationError = validateUuid(authorId, 'Author ID')
+  if (validationError) {
+    throw new Error(validationError)
+  }
+
   const { data, error } = await supabase
     .from('articles')
     .select('*')
@@ -221,6 +398,7 @@ export async function fetchMyArticles(authorId: string) {
       avatar_url: profile.avatarUrl,
       bio: profile.bio,
       created_at: '',
+      designation: profile.designation,
       display_name: profile.displayName,
       updated_at: '',
       username: profile.username,
@@ -228,9 +406,118 @@ export async function fetchMyArticles(authorId: string) {
   )
 }
 
+export async function fetchPublishedCommunityArticles(limit = 8) {
+  if (!supabase) {
+    return []
+  }
+
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    throw error
+  }
+
+  if (!data.length) {
+    return []
+  }
+
+  const authorIds = [...new Set(data.map((article) => article.author_id))]
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('*')
+    .in('id', authorIds)
+
+  const profilesById = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
+
+  return data.map((article) => toCommunityArticle(article, profilesById.get(article.author_id)))
+}
+
+export async function fetchAdminReviewArticles() {
+  if (!supabase) {
+    return []
+  }
+
+  const { data, error } = await supabase
+    .rpc('admin_fetch_review_articles', {
+      admin_password: HARDCODED_ADMIN_PASSWORD,
+    })
+
+  if (error) {
+    throw error
+  }
+
+  return (data as AdminReviewArticleRow[]).map((article) =>
+    toCommunityArticle(article, {
+      id: article.author_id,
+      avatar_url: article.author_avatar_url,
+      bio: null,
+      created_at: '',
+      designation: article.author_designation,
+      display_name: article.author_display_name,
+      updated_at: '',
+      username: article.author_username,
+    }),
+  )
+}
+
+export async function updateArticleReviewStatus(
+  articleId: string,
+  status: 'published' | 'rejected',
+) {
+  if (!supabase) {
+    throw new Error('Supabase is not configured.')
+  }
+
+  const validationError =
+    validateUuid(articleId, 'Article ID') ||
+    (status !== 'published' && status !== 'rejected' ? 'Review status is invalid.' : null)
+
+  if (validationError) {
+    throw new Error(validationError)
+  }
+
+  const { data, error } = await supabase
+    .rpc('admin_update_article_review_status', {
+      admin_password: HARDCODED_ADMIN_PASSWORD,
+      article_id: articleId,
+      next_status: status,
+    })
+    .single()
+
+  if (error) {
+    throw new Error(`Article review update failed: ${getAdminRpcErrorMessage(error)}`)
+  }
+
+  const article = data as AdminReviewArticleRow
+
+  return toCommunityArticle(article, {
+    id: article.author_id,
+    avatar_url: article.author_avatar_url,
+    bio: null,
+    created_at: '',
+    designation: article.author_designation,
+    display_name: article.author_display_name,
+    updated_at: '',
+    username: article.author_username,
+  })
+}
+
 export async function deleteCommunityArticle(articleId: string, authorId: string) {
   if (!supabase) {
     throw new Error('Supabase is not configured.')
+  }
+
+  const validationError =
+    validateUuid(articleId, 'Article ID') || validateUuid(authorId, 'Author ID')
+
+  if (validationError) {
+    throw new Error(validationError)
   }
 
   const {

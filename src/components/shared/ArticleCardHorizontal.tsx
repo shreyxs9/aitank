@@ -36,6 +36,7 @@ export function ArticleCardHorizontal({ article }: ArticleCardHorizontalProps) {
         </div>
         <MetaRow
           author={article.author}
+          authorAvatarUrl={article.authorAvatarUrl}
           role={article.role}
           publishedAt={article.publishedAt}
           readTime={article.readTime}

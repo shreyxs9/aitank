@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import logo from '../../assets/aitank-logo-light.png'
+import { isHardcodedAdminSession } from '../../lib/adminAuth'
 import { useAuth } from '../auth/useAuth'
 
 const navItems = [
@@ -25,6 +26,7 @@ function WhatsAppIcon() {
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const { profile, signOut, user } = useAuth()
+  const hasAdminSession = isHardcodedAdminSession()
 
   async function handleSignOut() {
     await signOut()
@@ -79,6 +81,21 @@ export function Header() {
               {item.label}
             </NavLink>
           ))}
+          {hasAdminSession ? (
+            <NavLink
+              to="/admin"
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `rounded-full px-4 py-2 text-sm transition ${
+                  isActive
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/62 hover:bg-white/6 hover:text-white'
+                }`
+              }
+            >
+              Admin
+            </NavLink>
+          ) : null}
           {user ? (
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
               <div className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/72">

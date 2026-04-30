@@ -12,9 +12,10 @@ const emphasisClasses = {
 export function TagPill({ children, emphasis = 'soft' }: TagPillProps) {
   return (
     <span
-      className={`inline-flex rounded-full border px-3 py-1 text-[0.68rem] font-medium tracking-[0.18em] uppercase ${emphasisClasses[emphasis]}`}
+      title={children}
+      className={`inline-flex max-w-full min-w-0 rounded-full border px-3 py-1 text-[0.68rem] font-medium uppercase tracking-[0.18em] ${emphasisClasses[emphasis]}`}
     >
-      {children}
+      <span className="block min-w-0 truncate">{children}</span>
     </span>
   )
 }

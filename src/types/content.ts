@@ -10,6 +10,8 @@ export interface ArticlePreview {
   title: string
   deck: string
   author: string
+  authorAvatarUrl?: string
+  authorDesignation?: string
   role: string
   readTime: string
   publishedAt: string
@@ -67,6 +69,8 @@ export interface FounderSpotlight {
   startup: string
   founder: string
   role: string
+  imageSrc?: string
+  imageAlt?: string
   location: string
   stage: string
   focus: string

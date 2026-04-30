@@ -51,6 +51,7 @@ export function HeroFeature({ article, issue, displayIndex = article.sectionInde
 
           <MetaRow
             author={article.author}
+            authorAvatarUrl={article.authorAvatarUrl}
             role={article.role}
             publishedAt={article.publishedAt}
             readTime={article.readTime}

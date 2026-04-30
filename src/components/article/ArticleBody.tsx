@@ -51,6 +51,44 @@ function DocumentPageCard({
   )
 }
 
+function AuthorAboutCard({ article }: { article: Article }) {
+  const designation = article.authorDesignation ?? article.role
+
+  if (!article.authorAvatarUrl && !designation) {
+    return null
+  }
+
+  return (
+    <section className="flex flex-col gap-4 rounded-[1.5rem] border border-white/10 bg-white/4 p-5 sm:flex-row sm:items-center sm:p-6">
+      <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-black/25 text-lg font-semibold text-white/55">
+        {article.authorAvatarUrl ? (
+          <img
+            src={article.authorAvatarUrl}
+            alt={`${article.author} profile picture`}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          article.author.slice(0, 1).toUpperCase()
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-coral">
+          About the author
+        </p>
+        <h2 className="mt-2 break-words font-display text-2xl font-extrabold tracking-[-0.03em] text-white">
+          {article.author}
+        </h2>
+        {designation ? (
+          <p className="mt-1 break-words text-sm leading-6 text-white/62">
+            {designation}
+          </p>
+        ) : null}
+      </div>
+    </section>
+  )
+}
+
 function AiOpsSkillsetLayout({ article }: { article: Article }) {
   return (
     <article className="min-w-0 border-b border-white/10 px-4 py-8 sm:px-6 sm:py-10 lg:px-0 lg:pr-10">
@@ -260,12 +298,14 @@ function AiOpsSkillsetLayout({ article }: { article: Article }) {
             About Author
           </h2>
           <p className="text-base leading-8 text-white/72 sm:text-lg">
-            Benz Paul is an AI transformation expert and Founder of QuantivX and AI Decoder
-            Academy, specializing in AI Ops, data annotation, and real-world AI deployment. With
-            over two decades of enterprise experience, he mentors students and professionals to
-            build practical careers in the evolving AI ecosystem.
+            Benz Paul is a GenAI and Agentic AI Transformation Coach / Director at Boston
+            Institute of Analytics, specializing in AI Ops, data annotation, and real-world AI
+            deployment. With over two decades of enterprise experience, he mentors students and
+            professionals to build practical careers in the evolving AI ecosystem.
           </p>
         </section>
+
+        <AuthorAboutCard article={article} />
       </div>
     </article>
   )
@@ -408,6 +448,8 @@ export function ArticleBody({ article, previewOnly = false }: ArticleBodyProps) 
               </div>
             </div>
           </section>
+
+          <AuthorAboutCard article={article} />
         </div>
       </article>
     )
@@ -443,6 +485,8 @@ export function ArticleBody({ article, previewOnly = false }: ArticleBodyProps) 
               ))}
             </div>
           ) : null}
+
+          <AuthorAboutCard article={article} />
         </div>
       </article>
     )
@@ -476,6 +520,8 @@ export function ArticleBody({ article, previewOnly = false }: ArticleBodyProps) 
             showPullQuote
           />
         ))}
+
+        <AuthorAboutCard article={article} />
       </div>
     </article>
   )

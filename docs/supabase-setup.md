@@ -25,13 +25,30 @@ The updated schema now:
 ## Current app flow
 
 - `/login` handles email/password auth.
-- `/write` is protected and lets a signed-in user create draft or published articles.
+- `/admin/login` handles admin email/password auth.
+- `/admin` lets configured admins review, approve, or reject contributor submissions.
+- `/write` is protected and lets a signed-in user create drafts or submit articles for review.
 - `/my-articles` lists the current user's submissions.
 - `/article/:slug` falls back to Supabase when the slug is not in the local mock content file.
+- The homepage only renders community articles with `status = 'published'`.
+- Admin-approved submissions are rows with `status = 'published'`.
+
+## Temporary admin setup
+
+Run `supabase/schema.sql` again so the temporary review RPC functions exist.
+
+Admins sign in at `/admin/login` with:
+
+- Admin ID: `aitank.com`
+- Password: `aitank2026`
+
+This is a temporary hardcoded gate. Move this to Supabase Auth roles before production.
+
+If `/admin` shows that the review queue failed to load, the most likely cause is that the
+latest schema has not been run in Supabase yet. Re-run `supabase/schema.sql`; the file grants
+RPC access and sends `notify pgrst, 'reload schema';` so PostgREST can find the new functions.
 
 ## Next build slices
 
 1. Add an editor with markdown blocks or rich text.
-2. Add admin moderation so community posts can be reviewed before public publish.
-3. Blend published community stories into the homepage once the editorial rules are defined.
-4. Revoke object URLs after preview replacement to tighten client-side cleanup.
+2. Revoke object URLs after preview replacement to tighten client-side cleanup.

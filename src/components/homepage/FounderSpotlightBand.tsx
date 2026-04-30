@@ -12,14 +12,14 @@ export function FounderSpotlightBand({ founders }: FounderSpotlightBandProps) {
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-lavender">
-              Founder spotlight
+              Contributors
             </p>
             <h2 className="editorial-heading font-display text-3xl font-extrabold leading-tight text-white sm:text-5xl">
-              Builders with strong opinions about the human layer.
+              Featured profiles
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-6 text-white/62">
-            Short founder portraits from the teams turning process discipline into product advantage.
+            Names, designations, and images from the current issue.
           </p>
         </div>
 

@@ -7,6 +7,15 @@ export function communityArticleToEditorialArticle(article: CommunityArticle): A
     .map((entry) => entry.trim())
     .filter(Boolean)
 
+  const statusLabel =
+    article.status === 'published'
+      ? 'Published contributor'
+      : article.status === 'pending_review'
+        ? 'Pending editorial review'
+        : article.status === 'rejected'
+          ? 'Rejected submission'
+          : 'Draft author'
+
   return {
     id: article.id,
     slug: article.slug,
@@ -16,7 +25,11 @@ export function communityArticleToEditorialArticle(article: CommunityArticle): A
     title: article.title,
     deck: article.deck,
     author: article.authorName,
-    role: article.status === 'published' ? 'Community contributor' : 'Draft author',
+    authorAvatarUrl: article.authorAvatarUrl ?? undefined,
+    authorDesignation: article.authorDesignation ?? undefined,
+    role:
+      article.authorDesignation ||
+      (article.status === 'published' ? 'Community contributor' : statusLabel),
     readTime: `${Math.max(3, Math.ceil(article.body.split(/\s+/).filter(Boolean).length / 180))} min read`,
     publishedAt: article.publishedAt
       ? new Date(article.publishedAt).toLocaleDateString('en-US', {
@@ -49,13 +62,19 @@ export function communityArticleToEditorialArticle(article: CommunityArticle): A
     sidebar: [
       {
         title: 'About the author',
-        items: [article.authorName, article.status === 'published' ? 'Published contributor' : 'Draft contributor'],
+        items: [article.authorName, article.authorDesignation || statusLabel],
       },
       {
         title: 'Article details',
         items: [
           article.section,
-          article.status === 'published' ? 'Visible to readers' : 'Visible to the author through direct link',
+          article.status === 'published'
+            ? 'Visible to readers'
+            : article.status === 'pending_review'
+              ? 'Waiting for admin approval'
+              : article.status === 'rejected'
+                ? 'Rejected by admin'
+                : 'Visible to the author through direct link',
         ],
       },
       {

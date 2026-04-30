@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { validateEmail } from '../../lib/validation'
 
 const googleSheetsScriptUrl = import.meta.env.VITE_GOOGLE_SHEETS_SCRIPT_URL?.trim()
 const iframeTargetName = 'newsletter-signup-target'
@@ -15,6 +16,12 @@ export function IssueSignupSection() {
 
     if (!googleSheetsScriptUrl) {
       setErrorMessage('Google Sheets script URL is not configured yet.')
+      return
+    }
+
+    const validationError = validateEmail(email)
+    if (validationError) {
+      setErrorMessage(validationError)
       return
     }
 
@@ -75,12 +82,23 @@ export function IssueSignupSection() {
               autoComplete="email"
               required
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value)
+                setErrorMessage(null)
+              }}
+              maxLength={254}
               placeholder="your@email.com"
               className="min-w-0 flex-1 rounded-full border border-white/12 bg-white/6 px-5 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-coral/50 focus:bg-white/10"
               disabled={isSubmitting}
             />
-            <input type="text" name="website" className="hidden" tabIndex={-1} autoComplete="off" />
+            <input
+              id="issue-signup-website"
+              type="text"
+              name="website"
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+            />
             <input type="hidden" name="source" value="The Loop newsletter signup" />
             <button
               type="submit"

@@ -29,25 +29,26 @@ export function ArticleCardVertical({
           accent={article.sectionTone === 'lavender' ? 'lavender' : 'coral'}
         />
       </div>
-      <div className="flex flex-1 flex-col gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
         <SectionLabel
           index={displayIndex}
           label={article.section}
           tone={article.sectionTone}
         />
-        <div className="space-y-3">
-          <h3 className="editorial-heading font-display text-xl font-bold leading-tight text-white transition group-hover:text-coral sm:text-2xl">
+        <div className="min-w-0 space-y-3">
+          <h3 className="editorial-heading line-clamp-2 break-words font-display text-xl font-bold leading-tight text-white transition group-hover:text-coral sm:text-2xl">
             {article.title}
           </h3>
-          <p className="text-sm leading-6 text-white/66">{article.deck}</p>
+          <p className="line-clamp-3 break-words text-sm leading-6 text-white/66">{article.deck}</p>
         </div>
-        <div className="mt-auto flex flex-wrap gap-2">
+        <div className="mt-auto flex min-w-0 flex-wrap gap-2">
           {article.tags.slice(0, 2).map((tag) => (
             <TagPill key={tag}>{tag}</TagPill>
           ))}
         </div>
         <MetaRow
           author={article.author}
+          authorAvatarUrl={article.authorAvatarUrl}
           role={article.role}
           publishedAt={article.publishedAt}
           readTime={article.readTime}

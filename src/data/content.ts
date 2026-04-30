@@ -18,6 +18,7 @@ export const articles: Article[] = [
     deck:
       'Vijay Raghava K S argues that the next AI leaders will not win on model novelty alone, but on the rigor of the pipelines that turn messy raw input into dependable training truth.',
     author: 'Vijay Raghava K S',
+    authorAvatarUrl: '/people/vijay-raghava-ks.jpeg',
     role: 'COO, Innerverse Tech',
     readTime: '8 min read',
     publishedAt: 'April 11, 2026',
@@ -140,7 +141,9 @@ export const articles: Article[] = [
     deck:
       'Krishna Potnis traces fintechs shift from speed and surface intelligence toward a harder standard: systems that can explain, justify, and improve machine-made decisions under real regulatory scrutiny.',
     author: 'Krishna Potnis',
-    role: 'Guest essay',
+    authorAvatarUrl: '/people/krishna-potnis.jpeg',
+    role:
+      'Fintech Growth Advisor | Payment systems | Tokenization | CloudPOS & SoftPOS | Responsible AI',
     readTime: '10 min read',
     publishedAt: 'April 11, 2026',
     imageLabel: 'Fintech risk dashboard with layered fraud signals',
@@ -337,6 +340,7 @@ export const articles: Article[] = [
     deck:
       'Chetan Bhambri argues that the most consequential AI decisions are often made before any model is chosen, in the definitions, category structures, and escalation rules that shape what the system learns.',
     author: 'Chetan Bhambri',
+    authorAvatarUrl: '/people/chetan-bhambri.jpeg',
     role: 'Founder, UinLEAD',
     readTime: '6 min read',
     publishedAt: 'April 11, 2026',
@@ -467,7 +471,9 @@ export const articles: Article[] = [
     deck:
       'Vivek Ganesan argues that Hermes is pushing annotation work upstream, from labeling outputs after deployment to designing reward loops and RL environments before users ever touch the agent.',
     author: 'Vivek Ganesan',
-    role: 'Co-founder, Ampyard',
+    authorAvatarUrl: '/people/vivek-ganesan.png',
+    role:
+      '2x Failed AI SaaS Maker, Published Author, AI-assisted Engineering Practices Educator, Public Speaker, DevOps Coach',
     readTime: '7 min read',
     publishedAt: 'April 12, 2026',
     imageLabel: 'Hermes Agent terminal-style cover graphic',
@@ -625,7 +631,8 @@ export const articles: Article[] = [
     deck:
       'Subimal Bhattacharjee argues that data annotation is the unglamorous backbone of AI progress, and that India now has a narrow chance to turn annotation quality, worker protections, and multilingual capacity into strategic advantage.',
     author: 'Subimal Bhattacharjee',
-    role: 'Policy adviser on tech and defence',
+    authorAvatarUrl: '/people/subimal-bhattacharjee.jpeg',
+    role: 'Author, Columnist & Policy adviser on tech and defence',
     readTime: '8 min read',
     publishedAt: 'April 13, 2026',
     imageLabel: 'Illustrated map of how annotated data powers modern AI systems',
@@ -735,7 +742,8 @@ export const articles: Article[] = [
     deck:
       'Benz Paul frames AI Ops and data annotation as the layer where enterprise AI either becomes reliable in the real world or breaks under messy data, weak context, and operational drift.',
     author: 'Benz Paul',
-    role: 'Founder, QuantivX and AI Decoder Academy',
+    authorAvatarUrl: '/people/benz-paul.jpeg',
+    role: 'GenAI & Agentic AI Transformation Coach / Director, Boston Institute of Analytics',
     readTime: '5 min read',
     publishedAt: 'April 13, 2026',
     imageLabel: 'First page of the Benz Paul AI Ops article',
@@ -760,7 +768,7 @@ export const articles: Article[] = [
       {
         heading: 'About the author',
         paragraphs: [
-          'Benz Paul is an AI transformation expert and Founder of QuantivX and AI Decoder Academy, specializing in AI Ops, data annotation, and real-world AI deployment.',
+          'Benz Paul is a GenAI and Agentic AI Transformation Coach / Director at Boston Institute of Analytics, specializing in AI Ops, data annotation, and real-world AI deployment.',
           'With over two decades of enterprise experience, he mentors students and professionals to build practical careers in the evolving AI ecosystem.',
         ],
       },
@@ -851,46 +859,102 @@ export const secondaryRowArticles = shuffleArticles<Article>([])
 
 export const founders: FounderSpotlight[] = [
   {
-    id: 'founder-necto',
-    startup: 'Necto Labs',
-    founder: 'Anika Sharma',
-    role: 'Co-founder',
-    location: 'Bengaluru',
-    stage: 'Pre-seed',
-    focus: 'NLP systems',
+    id: 'chetan-bhambri',
+    startup: 'UinLEAD',
+    founder: 'Chetan Bhambri',
+    role: 'Founder, UinLEAD',
+    imageSrc: '/people/chetan-bhambri.jpeg',
+    imageAlt: 'Portrait of Chetan Bhambri',
+    location: 'India',
+    stage: 'Founder',
+    focus: 'AI governance',
     quote:
-      'The model is only as honest as the people allowed to challenge its first confident answer.',
+      'The most consequential AI decisions are often made before any model is chosen.',
     summary:
-      'Necto Labs is building legal workflow tools with a stubborn focus on review quality, source traceability, and operator feedback.',
-    cta: 'Read founder story',
+      'Chetan focuses on the definitions, category structures, and escalation rules that shape what enterprise AI systems learn.',
+    cta: 'Read profile',
   },
   {
-    id: 'founder-arcgrid',
-    startup: 'Arcgrid Health',
-    founder: 'Harshil Mehta',
-    role: 'Founder',
-    location: 'Mumbai',
-    stage: 'Seed',
-    focus: 'Clinical ops AI',
+    id: 'vivek-ganesan',
+    startup: 'AI Engineering Practice',
+    founder: 'Vivek Ganesan',
+    role:
+      '2x Failed AI SaaS Maker, Published Author, AI-assisted Engineering Practices Educator, Public Speaker, DevOps Coach',
+    imageSrc: '/people/vivek-ganesan.png',
+    imageAlt: 'Portrait of Vivek Ganesan',
+    location: 'India',
+    stage: 'Educator',
+    focus: 'AI engineering',
     quote:
-      'Our moat is not the model. It is the care we took building the review process around the model.',
+      'Annotation is moving earlier in the product lifecycle and becoming more structured around the training loop.',
     summary:
-      'Arcgrid Health pairs clinical review teams with workflow-specific copilots built for real hospital constraints.',
-    cta: 'Explore spotlight',
+      'Vivek teaches AI-assisted engineering practices and writes about how reward loops and RL environments change applied AI work.',
+    cta: 'Read profile',
   },
   {
-    id: 'founder-verbloom',
-    startup: 'Verbloom',
-    founder: 'Lina George',
-    role: 'Co-founder',
-    location: 'Remote',
-    stage: 'Early revenue',
-    focus: 'Customer support AI',
+    id: 'benz-paul',
+    startup: 'Boston Institute of Analytics',
+    founder: 'Benz Paul',
+    role: 'GenAI & Agentic AI Transformation Coach / Director, Boston Institute of Analytics',
+    imageSrc: '/people/benz-paul.jpeg',
+    imageAlt: 'Portrait of Benz Paul',
+    location: 'India',
+    stage: 'Coach',
+    focus: 'Agentic AI',
     quote:
-      'When support teams trust the review loop, adoption becomes a product story instead of a change-management problem.',
+      'The future belongs to people who can teach AI, correct it, and make it work.',
     summary:
-      'Verbloom helps customer operations teams redesign escalation and QA workflows before they automate them.',
-    cta: 'Meet the team',
+      'Benz works on GenAI transformation, agentic AI readiness, AI Ops, data annotation, and real-world enterprise deployment.',
+    cta: 'Read profile',
+  },
+  {
+    id: 'subimal-bhattacharjee',
+    startup: 'Policy and Defence',
+    founder: 'Subimal Bhattacharjee',
+    role: 'Author, Columnist & Policy adviser on tech and defence',
+    imageSrc: '/people/subimal-bhattacharjee.jpeg',
+    imageAlt: 'Portrait of Subimal Bhattacharjee',
+    location: 'India',
+    stage: 'Author',
+    focus: 'Tech policy',
+    quote:
+      'Data annotation is not glamorous, but it is the soil in which modern AI models grow.',
+    summary:
+      'Subimal writes on technology, defence, and the strategic choices shaping AI governance, worker protections, and multilingual capacity.',
+    cta: 'Read profile',
+  },
+  {
+    id: 'krishna-potnis',
+    startup: 'Fintech Growth',
+    founder: 'Krishna Potnis',
+    role:
+      'Fintech Growth Advisor | Delivered payment systems processing daily 100MN+ txns | Tokenization | CloudPOS & SoftPOS | AI in Fintech | RegTech | Author, Connecting Fintech | Digital Banking | Responsible AI | MicroERP',
+    imageSrc: '/people/krishna-potnis.jpeg',
+    imageAlt: 'Portrait of Krishna Potnis',
+    location: 'India',
+    stage: 'Advisor',
+    focus: 'Fintech AI',
+    quote:
+      'The visible failure happens at the prediction layer. The real failure starts at the truth layer.',
+    summary:
+      'Krishna advises on fintech growth, payment infrastructure, tokenization, CloudPOS, SoftPOS, RegTech, responsible AI, and digital banking.',
+    cta: 'Read profile',
+  },
+  {
+    id: 'vijay-raghava-ks',
+    startup: 'Innerverse Tech',
+    founder: 'Vijay Raghava K S',
+    role: 'COO, Innerverse Tech',
+    imageSrc: '/people/vijay-raghava-ks.jpeg',
+    imageAlt: 'Portrait of Vijay Raghava K S',
+    location: 'India',
+    stage: 'Operator',
+    focus: 'Data factories',
+    quote:
+      'The companies that lead AI will treat data preparation as a core discipline, not a cost center.',
+    summary:
+      'Vijay focuses on the disciplined data pipelines and domain-aware annotation workflows that make AI systems reliable.',
+    cta: 'Read profile',
   },
 ]
 
