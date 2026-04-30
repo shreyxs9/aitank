@@ -1,6 +1,7 @@
 import type { CommunityArticleStatus } from '../types/communityArticles'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+export const EMAIL_MAX_LENGTH = 50
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const safeTextPattern = /^[\p{L}\p{N}\s.,:;!?'"()&/@#+\-–—_]+$/u
 
@@ -15,7 +16,11 @@ export function validateEmail(email: string) {
     return 'Enter an email address.'
   }
 
-  if (normalizedEmail.length > 254 || !emailPattern.test(normalizedEmail)) {
+  if (normalizedEmail.length > EMAIL_MAX_LENGTH) {
+    return `Email must be ${EMAIL_MAX_LENGTH} characters or fewer.`
+  }
+
+  if (!emailPattern.test(normalizedEmail)) {
     return 'Enter a valid email address.'
   }
 

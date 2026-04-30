@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { validateEmail } from '../../lib/validation'
+import { EMAIL_MAX_LENGTH, validateEmail } from '../../lib/validation'
 
 const googleSheetsScriptUrl = import.meta.env.VITE_GOOGLE_SHEETS_SCRIPT_URL?.trim()
 const iframeTargetName = 'newsletter-signup-target'
@@ -86,7 +86,7 @@ export function IssueSignupSection() {
                 setEmail(event.target.value)
                 setErrorMessage(null)
               }}
-              maxLength={254}
+              maxLength={EMAIL_MAX_LENGTH}
               placeholder="your@email.com"
               className="min-w-0 flex-1 rounded-full border border-white/12 bg-white/6 px-5 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-coral/50 focus:bg-white/10"
               disabled={isSubmitting}

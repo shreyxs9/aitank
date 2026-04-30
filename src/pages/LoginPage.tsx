@@ -6,6 +6,7 @@ import { SupabaseNotice } from '../components/shared/SupabaseNotice'
 import { useAuth } from '../components/auth/useAuth'
 import { supabase } from '../lib/supabase'
 import {
+  EMAIL_MAX_LENGTH,
   normalizeWhitespace,
   validateDesignation,
   validateDisplayName,
@@ -31,6 +32,8 @@ export function LoginPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false)
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null)
 
   useEffect(() => {
     return () => {
@@ -64,6 +67,7 @@ export function LoginPage() {
     setIsSubmitting(true)
     setError(null)
     setMessage(null)
+    setPendingConfirmationEmail(null)
 
     try {
       const normalizedEmail = email.trim().toLowerCase()
@@ -136,11 +140,12 @@ export function LoginPage() {
           })
         }
 
-        setMessage(
-          signUpData.session
-            ? 'Account created. Redirecting...'
-            : 'Account created. Check your email if confirmation is enabled.',
-        )
+        if (signUpData.session) {
+          setMessage('Account created. Redirecting...')
+        } else {
+          setPendingConfirmationEmail(normalizedEmail)
+          setMessage('Account created. Check your email to confirm your account.')
+        }
       }
     } catch (caughtError) {
       const nextError =
@@ -148,6 +153,42 @@ export function LoginPage() {
       setError(nextError)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  async function handleResendConfirmation() {
+    if (!supabase || !pendingConfirmationEmail) {
+      return
+    }
+
+    const validationError = validateEmail(pendingConfirmationEmail)
+
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
+    setIsResendingConfirmation(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: pendingConfirmationEmail,
+      })
+
+      if (resendError) {
+        throw resendError
+      }
+
+      setMessage('Confirmation email sent again. Check your inbox.')
+    } catch (caughtError) {
+      const nextError =
+        caughtError instanceof Error ? caughtError.message : 'Could not resend confirmation email.'
+      setError(nextError)
+    } finally {
+      setIsResendingConfirmation(false)
     }
   }
 
@@ -373,7 +414,7 @@ export function LoginPage() {
                     }}
                     type="email"
                     autoComplete="email"
-                    maxLength={254}
+                    maxLength={EMAIL_MAX_LENGTH}
                     required
                     className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
                     placeholder="you@example.com"
@@ -409,6 +450,22 @@ export function LoginPage() {
                   <p className="rounded-2xl border border-[#7BFFB2]/20 bg-[#7BFFB2]/10 px-4 py-3 text-sm text-[#7BFFB2]">
                     {message}
                   </p>
+                ) : null}
+                {pendingConfirmationEmail ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/58">
+                    <p>
+                      Did not receive it? We can resend the confirmation mail to{' '}
+                      <span className="font-medium text-white/78">{pendingConfirmationEmail}</span>.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleResendConfirmation}
+                      disabled={isSubmitting || isResendingConfirmation}
+                      className="mt-3 rounded-full border border-white/12 px-4 py-2 text-xs font-semibold text-white transition hover:border-coral/50 hover:text-coral disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isResendingConfirmation ? 'Sending...' : 'Resend email'}
+                    </button>
+                  </div>
                 ) : null}
 
                 <button
