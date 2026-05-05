@@ -6,8 +6,9 @@ import { ArticleSidebar } from '../components/article/ArticleSidebar'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
 import { getArticleBySlug } from '../data/content'
+import { isHardcodedAdminSession } from '../lib/adminAuth'
 import { communityArticleToEditorialArticle } from '../lib/articleTransforms'
-import { fetchCommunityArticleBySlug } from '../lib/communityArticles'
+import { fetchAdminReviewArticles, fetchCommunityArticleBySlug } from '../lib/communityArticles'
 import type { Article } from '../types/content'
 import { useAuth } from '../components/auth/useAuth'
 
@@ -40,11 +41,18 @@ export function ArticlePage() {
       setIsLoading(true)
 
       try {
-        const communityArticle = await fetchCommunityArticleBySlug(slug)
+        const adminReviewArticle = isHardcodedAdminSession()
+          ? (await fetchAdminReviewArticles()).find((article) => article.slug === slug)
+          : null
+        const communityArticle = adminReviewArticle
+          ? null
+          : await fetchCommunityArticleBySlug(slug)
 
         if (!cancelled) {
           setArticle(
-            communityArticle ? communityArticleToEditorialArticle(communityArticle) : undefined,
+            communityArticle || adminReviewArticle
+              ? communityArticleToEditorialArticle(communityArticle ?? adminReviewArticle!)
+              : undefined,
           )
         }
       } finally {
@@ -77,7 +85,7 @@ export function ArticlePage() {
     return <Navigate to="/" replace />
   }
 
-  const previewOnly = !user
+  const previewOnly = !user && !isHardcodedAdminSession()
 
   return (
     <div className="min-h-screen">

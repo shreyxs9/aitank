@@ -9,9 +9,12 @@ import { supabase } from '../lib/supabase'
 import { validateUuid } from '../lib/validation'
 import type { CommunityArticle } from '../types/communityArticles'
 
+type ReviewFilter = 'all' | 'pending_review' | 'published' | 'rejected'
+
 export function AdminDashboardPage() {
   const navigate = useNavigate()
   const [articles, setArticles] = useState<CommunityArticle[]>([])
+  const [activeFilter, setActiveFilter] = useState<ReviewFilter>('pending_review')
   const [isLoading, setIsLoading] = useState(true)
   const [updatingArticleId, setUpdatingArticleId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -25,6 +28,20 @@ export function AdminDashboardPage() {
     }),
     [articles],
   )
+
+  const filteredArticles = useMemo(() => {
+    const nextArticles =
+      activeFilter === 'all'
+        ? articles
+        : articles.filter((article) => article.status === activeFilter)
+
+    return [...nextArticles].sort((firstArticle, secondArticle) => {
+      const firstDate = new Date(firstArticle.publishedAt ?? firstArticle.createdAt).getTime()
+      const secondDate = new Date(secondArticle.publishedAt ?? secondArticle.createdAt).getTime()
+
+      return secondDate - firstDate
+    })
+  }, [activeFilter, articles])
 
   useEffect(() => {
     let cancelled = false
@@ -119,6 +136,43 @@ export function AdminDashboardPage() {
     return 'Draft'
   }
 
+  function getFilteredEmptyMessage() {
+    if (activeFilter === 'published') {
+      return {
+        title: 'No approved articles yet',
+        detail: 'Approved submissions will stay here so admins can revisit live community posts.',
+      }
+    }
+
+    if (activeFilter === 'rejected') {
+      return {
+        title: 'No rejected articles',
+        detail: 'Rejected submissions will appear here if an admin sends a post back from review.',
+      }
+    }
+
+    if (activeFilter === 'pending_review') {
+      return {
+        title: 'No pending submissions',
+        detail: 'New contributor submissions will appear here when they are ready for review.',
+      }
+    }
+
+    return {
+      title: 'No submissions yet',
+      detail: 'Submitted articles will appear here when contributors send them for review.',
+    }
+  }
+
+  const filterItems: Array<{ count: number; label: string; value: ReviewFilter }> = [
+    { count: stats.pending, label: 'Pending', value: 'pending_review' },
+    { count: stats.published, label: 'Approved', value: 'published' },
+    { count: stats.rejected, label: 'Rejected', value: 'rejected' },
+    { count: stats.total, label: 'All', value: 'all' },
+  ]
+
+  const emptyMessage = getFilteredEmptyMessage()
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -189,11 +243,58 @@ export function AdminDashboardPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4">
-            {articles.map((article) => (
+          <div className="space-y-5">
+            <div className="flex flex-wrap gap-2 rounded-[1.25rem] border border-white/10 bg-black/20 p-2">
+              {filterItems.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => {
+                    setActiveFilter(item.value)
+                    setError(null)
+                  }}
+                  className={`flex min-h-11 items-center gap-2 rounded-full px-4 text-sm transition ${
+                    activeFilter === item.value
+                      ? 'bg-white text-ink'
+                      : 'text-white/58 hover:bg-white/6 hover:text-white'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      activeFilter === item.value
+                        ? 'bg-ink/10 text-ink/72'
+                        : 'bg-white/8 text-white/44'
+                    }`}
+                  >
+                    {item.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {filteredArticles.length === 0 ? (
+              <div className="rounded-[2rem] border border-white/10 bg-white/4 p-8">
+                <p className="text-xl font-bold tracking-[-0.03em] text-white">
+                  {emptyMessage.title}
+                </p>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-white/62">
+                  {emptyMessage.detail}
+                </p>
+              </div>
+            ) : null}
+
+            <div className="grid gap-4">
+            {filteredArticles.map((article) => (
               <article
                 key={article.id}
-                className="grid gap-5 rounded-[1.5rem] border border-white/10 bg-white/4 p-4 md:grid-cols-[12rem,1fr] md:p-5"
+                className={`grid gap-5 rounded-[1.5rem] border p-4 md:grid-cols-[12rem,1fr] md:p-5 ${
+                  article.status === 'published'
+                    ? 'border-[#7BFFB2]/20 bg-[#7BFFB2]/[0.045]'
+                    : article.status === 'rejected'
+                      ? 'border-white/10 bg-white/[0.025]'
+                      : 'border-white/10 bg-white/4'
+                }`}
               >
                 <div className="overflow-hidden rounded-[1.1rem] border border-white/10 bg-white/5">
                   {article.coverImageUrl ? (
@@ -212,11 +313,15 @@ export function AdminDashboardPage() {
                 <div className="min-w-0">
                   <div className="mb-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/40">
                     <span>{article.authorName}</span>
-                    <span>{formatDate(article.createdAt)}</span>
+                    <span>
+                      {article.status === 'published' && article.publishedAt
+                        ? `Approved ${formatDate(article.publishedAt)}`
+                        : `Submitted ${formatDate(article.createdAt)}`}
+                    </span>
                     <span
                       className={`rounded-full border px-3 py-1 tracking-[0.16em] ${
                         article.status === 'published'
-                          ? 'border-coral/30 bg-coral/12 text-coral'
+                          ? 'border-[#7BFFB2]/30 bg-[#7BFFB2]/12 text-[#7BFFB2]'
                           : article.status === 'rejected'
                             ? 'border-white/10 bg-white/5 text-white/52'
                             : 'border-lavender/30 bg-lavender/12 text-lavender'
@@ -252,7 +357,7 @@ export function AdminDashboardPage() {
                       to={`/article/${article.slug}`}
                       className="rounded-full border border-coral/25 bg-coral/10 px-4 py-2 text-sm text-coral transition hover:bg-coral hover:text-white"
                     >
-                      Preview
+                      {article.status === 'published' ? 'Open live post' : 'Preview'}
                     </Link>
                     <button
                       type="button"
@@ -260,7 +365,11 @@ export function AdminDashboardPage() {
                       disabled={updatingArticleId === article.id || article.status === 'published'}
                       className="rounded-full border border-[#7BFFB2]/25 bg-[#7BFFB2]/10 px-4 py-2 text-sm text-[#7BFFB2] transition hover:bg-[#7BFFB2] hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {updatingArticleId === article.id ? 'Updating...' : 'Approve'}
+                      {updatingArticleId === article.id
+                        ? 'Updating...'
+                        : article.status === 'published'
+                          ? 'Approved'
+                          : 'Approve'}
                     </button>
                     <button
                       type="button"
@@ -268,12 +377,13 @@ export function AdminDashboardPage() {
                       disabled={updatingArticleId === article.id || article.status === 'rejected'}
                       className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/54 transition hover:border-coral/30 hover:text-coral disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Reject
+                      {article.status === 'published' ? 'Remove from live' : 'Reject'}
                     </button>
                   </div>
                 </div>
               </article>
             ))}
+            </div>
           </div>
         )}
       </main>
