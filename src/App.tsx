@@ -8,6 +8,8 @@ import { ArticlePage } from './pages/ArticlePage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyArticlesPage } from './pages/MyArticlesPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { WriteArticlePage } from './pages/WriteArticlePage'
 
 function App() {
@@ -17,6 +19,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/article/:slug" element={<ArticlePage />} />
         <Route
@@ -40,6 +43,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MyArticlesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

@@ -1,5 +1,6 @@
 import type { Session, User } from '@supabase/supabase-js'
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -18,7 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(Boolean(supabase))
   const [isAdminLoading, setIsAdminLoading] = useState(Boolean(supabase))
 
-  async function refreshProfileForUser(nextUser: User | null) {
+  const refreshProfileForUser = useCallback(async (nextUser: User | null) => {
     if (!nextUser || !supabase) {
       setProfile(null)
       return
@@ -33,9 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const ensuredProfile = await ensureProfile(nextUser).catch(() => null)
     setProfile(ensuredProfile)
-  }
+  }, [])
 
-  async function refreshAdminForUser(nextUser: User | null) {
+  const refreshAdminForUser = useCallback(async (nextUser: User | null) => {
     if (!nextUser || !supabase) {
       setAdminProfile(null)
       setIsAdminLoading(false)
@@ -46,7 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const nextAdminProfile = await getAdminProfileByEmail(nextUser.email).catch(() => null)
     setAdminProfile(nextAdminProfile)
     setIsAdminLoading(false)
-  }
+  }, [])
+
+  const refreshProfile = useCallback(async () => {
+    await refreshProfileForUser(user)
+  }, [refreshProfileForUser, user])
+
+  const refreshAdminProfile = useCallback(async () => {
+    await refreshAdminForUser(user)
+  }, [refreshAdminForUser, user])
 
   useEffect(() => {
     const client = supabase
@@ -87,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isMounted = false
       subscription.unsubscribe()
     }
-  }, [])
+  }, [refreshAdminForUser, refreshProfileForUser])
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -97,12 +106,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdminLoading,
       isLoading,
       profile,
-      refreshAdminProfile: async () => {
-        await refreshAdminForUser(user)
-      },
-      refreshProfile: async () => {
-        await refreshProfileForUser(user)
-      },
+      refreshAdminProfile,
+      refreshProfile,
       session,
       signOut: async () => {
         if (!supabase) {
@@ -113,7 +118,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       user,
     }),
-    [adminProfile, isAdminLoading, isLoading, profile, session, user],
+    [
+      adminProfile,
+      isAdminLoading,
+      isLoading,
+      profile,
+      refreshAdminProfile,
+      refreshProfile,
+      session,
+      user,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

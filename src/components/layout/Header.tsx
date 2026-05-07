@@ -3,9 +3,13 @@ import { Link, NavLink } from 'react-router-dom'
 import logo from '../../assets/aitank-logo-light.png'
 import { isHardcodedAdminSession } from '../../lib/adminAuth'
 import { useAuth } from '../auth/useAuth'
+import { ConfirmationDialog } from '../shared/ConfirmationDialog'
 
 const navItems = [
   { label: 'Home', to: '/' },
+]
+
+const authenticatedNavItems = [
   { label: 'Write', to: '/write' },
   { label: 'My Articles', to: '/my-articles' },
 ]
@@ -25,10 +29,12 @@ function WhatsAppIcon() {
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false)
   const { profile, signOut, user } = useAuth()
   const hasAdminSession = isHardcodedAdminSession()
 
   async function handleSignOut() {
+    setIsSignOutDialogOpen(false)
     await signOut()
     setIsOpen(false)
   }
@@ -81,6 +87,24 @@ export function Header() {
               {item.label}
             </NavLink>
           ))}
+          {user
+            ? authenticatedNavItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setIsOpen(false)}
+                  className={({ isActive }) =>
+                    `rounded-full px-4 py-2 text-sm transition ${
+                      isActive
+                        ? 'bg-white/10 text-white'
+                        : 'text-white/62 hover:bg-white/6 hover:text-white'
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))
+            : null}
           {hasAdminSession ? (
             <NavLink
               to="/admin"
@@ -98,12 +122,22 @@ export function Header() {
           ) : null}
           {user ? (
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
-              <div className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/72">
+              <NavLink
+                to="/profile"
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) =>
+                  `rounded-full border px-4 py-2 text-sm transition ${
+                    isActive
+                      ? 'border-coral/40 bg-coral/14 text-coral'
+                      : 'border-white/10 text-white/72 hover:bg-white/6 hover:text-white'
+                  }`
+                }
+              >
                 {profile?.displayName || user.email}
-              </div>
+              </NavLink>
               <button
                 type="button"
-                onClick={handleSignOut}
+                onClick={() => setIsSignOutDialogOpen(true)}
                 className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/72 transition hover:bg-white/6 hover:text-white"
               >
                 Sign out
@@ -111,7 +145,7 @@ export function Header() {
             </div>
           ) : (
             <NavLink
-              to="/login"
+              to="/login#login-section"
               onClick={() => setIsOpen(false)}
               className={({ isActive }) =>
                 `rounded-full border px-4 py-2 text-sm transition ${
@@ -145,6 +179,14 @@ export function Header() {
           </a>
         </nav>
       </div>
+      <ConfirmationDialog
+        confirmLabel="Log out"
+        isOpen={isSignOutDialogOpen}
+        message="Are you sure you want to log out of this account?"
+        onCancel={() => setIsSignOutDialogOpen(false)}
+        onConfirm={() => void handleSignOut()}
+        title="Log out?"
+      />
     </header>
   )
 }

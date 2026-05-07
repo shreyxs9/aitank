@@ -111,6 +111,12 @@ export interface Database {
     }
     Views: Record<string, never>
     Functions: {
+      email_is_registered: {
+        Args: {
+          email_to_check: string
+        }
+        Returns: boolean
+      }
       admin_fetch_review_articles: {
         Args: {
           admin_password: string

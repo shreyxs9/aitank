@@ -177,20 +177,34 @@ export async function updateProfileDetails(
     typeof details.displayName === 'string' ? normalizeWhitespace(details.displayName) : null
   const validationError =
     validateUuid(userId, 'User ID') ||
-    (normalizedDisplayName ? validateDisplayName(normalizedDisplayName) : null) ||
-    (normalizedDesignation ? validateDesignation(normalizedDesignation) : null)
+    (details.displayName !== undefined && normalizedDisplayName
+      ? validateDisplayName(normalizedDisplayName)
+      : null) ||
+    (details.designation !== undefined && normalizedDesignation
+      ? validateDesignation(normalizedDesignation)
+      : null)
 
   if (validationError) {
     throw new Error(validationError)
   }
 
+  const payload: Database['public']['Tables']['profiles']['Update'] = {}
+
+  if (details.avatarUrl !== undefined) {
+    payload.avatar_url = details.avatarUrl
+  }
+
+  if (details.designation !== undefined) {
+    payload.designation = normalizedDesignation
+  }
+
+  if (details.displayName !== undefined) {
+    payload.display_name = normalizedDisplayName
+  }
+
   const { data, error } = await supabase
     .from('profiles')
-    .update({
-      avatar_url: details.avatarUrl ?? null,
-      designation: normalizedDesignation,
-      display_name: normalizedDisplayName,
-    })
+    .update(payload)
     .eq('id', userId)
     .select()
     .single()
@@ -229,6 +243,36 @@ export async function uploadProfilePicture(userId: string, file: File) {
   const { data } = supabase.storage.from('profile-pictures').getPublicUrl(filePath)
 
   return data.publicUrl
+}
+
+export async function deleteProfilePicture(userId: string, avatarUrl: string | null | undefined) {
+  if (!supabase || !avatarUrl) {
+    return
+  }
+
+  const validationError = validateUuid(userId, 'User ID')
+  if (validationError) {
+    throw new Error(validationError)
+  }
+
+  const marker = '/profile-pictures/'
+  const markerIndex = avatarUrl.indexOf(marker)
+
+  if (markerIndex === -1) {
+    return
+  }
+
+  const filePath = decodeURIComponent(avatarUrl.slice(markerIndex + marker.length).split('?')[0])
+
+  if (!filePath.startsWith(`${userId}/`)) {
+    return
+  }
+
+  const { error } = await supabase.storage.from('profile-pictures').remove([filePath])
+
+  if (error) {
+    throw new Error(`Profile picture removal failed: ${error.message}`)
+  }
 }
 
 export async function createCommunityArticle(authorId: string, draft: CommunityArticleDraft) {

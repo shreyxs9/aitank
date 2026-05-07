@@ -130,7 +130,6 @@ export function parseTags(tags: string) {
     .split(',')
     .map((item) => normalizeWhitespace(item))
     .filter(Boolean)
-    .slice(0, 6)
 }
 
 export function validateTags(tags: string[]) {

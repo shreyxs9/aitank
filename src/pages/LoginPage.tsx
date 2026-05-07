@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
@@ -18,6 +18,16 @@ import { updateProfileDetails, uploadProfilePicture } from '../lib/communityArti
 
 type AuthMode = 'login' | 'signup'
 
+const duplicateEmailMessage = 'Email already exists, please try another email ID'
+
+function getEmailCheckErrorMessage(error: { code?: string; message?: string }) {
+  if (error.code === 'PGRST202') {
+    return 'Email validation is not available yet. Run the latest Supabase schema and try again.'
+  }
+
+  return error.message || 'Could not validate this email address.'
+}
+
 export function LoginPage() {
   const location = useLocation()
   const from = typeof location.state?.from === 'string' ? location.state.from : '/write'
@@ -25,6 +35,9 @@ export function LoginPage() {
   const [mode, setMode] = useState<AuthMode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [designation, setDesignation] = useState('')
   const [profilePicture, setProfilePicture] = useState<File | null>(null)
@@ -33,7 +46,9 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResendingConfirmation, setIsResendingConfirmation] = useState(false)
+  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false)
   const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null)
+  const profilePictureInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     return () => {
@@ -51,6 +66,10 @@ export function LoginPage() {
     setProfilePicture(file)
     setProfilePicturePreview(file ? URL.createObjectURL(file) : null)
     setError(null)
+
+    if (!file && profilePictureInputRef.current) {
+      profilePictureInputRef.current.value = ''
+    }
   }
 
   if (user) {
@@ -76,6 +95,7 @@ export function LoginPage() {
       const validationError =
         validateEmail(normalizedEmail) ||
         validatePassword(password) ||
+        (mode === 'signup' && password !== confirmPassword ? 'Passwords do not match.' : null) ||
         (mode === 'signup'
           ? validateDisplayName(normalizedDisplayName) ||
             validateDesignation(normalizedDesignation) ||
@@ -99,6 +119,22 @@ export function LoginPage() {
 
         setMessage('Signed in. Redirecting...')
       } else {
+        const { data: isEmailRegistered, error: emailCheckError } = await supabase.rpc(
+          'email_is_registered',
+          {
+            email_to_check: normalizedEmail,
+          },
+        )
+
+        if (emailCheckError) {
+          throw new Error(getEmailCheckErrorMessage(emailCheckError))
+        }
+
+        if (isEmailRegistered) {
+          setError(duplicateEmailMessage)
+          return
+        }
+
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: normalizedEmail,
           password,
@@ -192,6 +228,46 @@ export function LoginPage() {
     }
   }
 
+  async function handleForgotPassword() {
+    if (!supabase) {
+      return
+    }
+
+    const normalizedEmail = email.trim().toLowerCase()
+    const validationError = validateEmail(normalizedEmail)
+
+    if (validationError) {
+      setError(validationError)
+      setMessage(null)
+      return
+    }
+
+    setIsSendingPasswordReset(true)
+    setError(null)
+    setMessage(null)
+    setPendingConfirmationEmail(null)
+
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+
+      if (resetError) {
+        throw resetError
+      }
+
+      setMessage('Password recovery email sent. Check your inbox for the reset link.')
+    } catch (caughtError) {
+      const nextError =
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Could not send the password recovery email.'
+      setError(nextError)
+    } finally {
+      setIsSendingPasswordReset(false)
+    }
+  }
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -276,7 +352,10 @@ export function LoginPage() {
             </div>
           </section>
 
-          <section className="relative rounded-[2.25rem] border border-white/10 bg-[linear-gradient(180deg,rgba(23,20,20,0.92),rgba(12,12,12,0.82))] p-4 shadow-[0_40px_90px_rgba(0,0,0,0.35)] sm:p-5">
+          <section
+            id="login-section"
+            className="relative scroll-mt-28 rounded-[2.25rem] border border-white/10 bg-[linear-gradient(180deg,rgba(23,20,20,0.92),rgba(12,12,12,0.82))] p-4 shadow-[0_40px_90px_rgba(0,0,0,0.35)] sm:p-5"
+          >
             <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-coral/50 to-transparent" />
             <div className="rounded-[1.9rem] border border-white/8 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.05),transparent_40%),rgba(255,255,255,0.02)] p-6 sm:p-8">
               <div className="mb-8 flex items-start justify-between gap-4">
@@ -307,7 +386,12 @@ export function LoginPage() {
                   <button
                     key={item}
                     type="button"
-                    onClick={() => setMode(item)}
+                    onClick={() => {
+                      setMode(item)
+                      setConfirmPassword('')
+                      setIsConfirmPasswordVisible(false)
+                      setError(null)
+                    }}
                     className={`flex-1 rounded-full px-4 py-3 text-sm font-medium transition ${
                       mode === item
                         ? 'bg-coral text-white shadow-[0_12px_30px_rgba(255,122,92,0.35)]'
@@ -352,9 +436,22 @@ export function LoginPage() {
                           <span className="mt-1 block truncate text-xs text-white/42">
                             {profilePicture ? profilePicture.name : 'Shown in your author section'}
                           </span>
+                          {profilePicture ? (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.preventDefault()
+                                setSelectedProfilePicture(null)
+                              }}
+                              className="mt-3 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/58 transition hover:border-coral/40 hover:text-coral"
+                            >
+                              Remove selected picture
+                            </button>
+                          ) : null}
                         </span>
                         <input
                           id="profile-picture"
+                          ref={profilePictureInputRef}
                           name="profilePicture"
                           type="file"
                           accept="image/jpeg,image/png,image/webp"
@@ -421,25 +518,94 @@ export function LoginPage() {
                   />
                 </label>
 
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-white/72">Password</span>
-                  <input
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={(event) => {
-                      setPassword(event.target.value)
-                      setError(null)
-                    }}
-                    type="password"
-                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    minLength={6}
-                    maxLength={128}
-                    required
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
-                    placeholder="Minimum 6 characters"
-                  />
-                </label>
+                <div>
+                  <span className="mb-2 flex items-center justify-between gap-3">
+                    <label htmlFor="password" className="text-sm font-medium text-white/72">
+                      Password
+                    </label>
+                    {mode === 'login' ? (
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        disabled={isSubmitting || isSendingPasswordReset}
+                        className="text-xs font-semibold text-white/58 transition hover:text-coral disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isSendingPasswordReset ? 'Sending...' : 'Forgot password?'}
+                      </button>
+                    ) : null}
+                  </span>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      value={password}
+                      onChange={(event) => {
+                        setPassword(event.target.value)
+                        setError(null)
+                      }}
+                      type={isPasswordVisible ? 'text' : 'password'}
+                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                      minLength={6}
+                      maxLength={128}
+                      required
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-20 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                      placeholder="Minimum 6 characters"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPasswordVisible((currentValue) => !currentValue)
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/58 transition hover:border-coral/50 hover:text-coral"
+                      aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                    >
+                      {isPasswordVisible ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+
+                {mode === 'signup' ? (
+                  <div>
+                    <label
+                      htmlFor="confirm-password"
+                      className="mb-2 block text-sm font-medium text-white/72"
+                    >
+                      Confirm password
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="confirm-password"
+                        name="confirmPassword"
+                        value={confirmPassword}
+                        onChange={(event) => {
+                          setConfirmPassword(event.target.value)
+                          setError(null)
+                        }}
+                        type={isConfirmPasswordVisible ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        minLength={6}
+                        maxLength={128}
+                        required
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-20 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                        placeholder="Repeat your password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsConfirmPasswordVisible((currentValue) => !currentValue)
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/58 transition hover:border-coral/50 hover:text-coral"
+                        aria-label={
+                          isConfirmPasswordVisible
+                            ? 'Hide confirmed password'
+                            : 'Show confirmed password'
+                        }
+                      >
+                        {isConfirmPasswordVisible ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
 
                 {error ? (
                   <p className="rounded-2xl border border-coral/20 bg-coral/10 px-4 py-3 text-sm text-coral">

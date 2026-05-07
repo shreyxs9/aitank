@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
+import { ConfirmationDialog } from '../components/shared/ConfirmationDialog'
 import { SupabaseNotice } from '../components/shared/SupabaseNotice'
 import { fetchAdminReviewArticles, updateArticleReviewStatus } from '../lib/communityArticles'
 import { HARDCODED_ADMIN_USERNAME, signOutHardcodedAdmin } from '../lib/adminAuth'
@@ -18,6 +19,7 @@ export function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [updatingArticleId, setUpdatingArticleId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false)
 
   const stats = useMemo(
     () => ({
@@ -108,6 +110,7 @@ export function AdminDashboardPage() {
   }
 
   function handleAdminSignOut() {
+    setIsSignOutDialogOpen(false)
     signOutHardcodedAdmin()
     navigate('/admin/login', { replace: true })
   }
@@ -191,7 +194,7 @@ export function AdminDashboardPage() {
             </p>
             <button
               type="button"
-              onClick={handleAdminSignOut}
+              onClick={() => setIsSignOutDialogOpen(true)}
               className="rounded-full border border-white/10 px-5 py-3 text-sm text-white/72 transition hover:bg-white/6 hover:text-white"
             >
               Sign out admin
@@ -387,6 +390,14 @@ export function AdminDashboardPage() {
           </div>
         )}
       </main>
+      <ConfirmationDialog
+        confirmLabel="Log out"
+        isOpen={isSignOutDialogOpen}
+        message="Are you sure you want to log out of this account?"
+        onCancel={() => setIsSignOutDialogOpen(false)}
+        onConfirm={handleAdminSignOut}
+        title="Log out?"
+      />
       <Footer />
     </div>
   )
