@@ -79,6 +79,24 @@ export function validateDesignation(designation: string) {
   return null
 }
 
+export function validateUsername(username: string) {
+  const normalizedUsername = username.trim().toLowerCase()
+
+  if (!normalizedUsername) {
+    return null
+  }
+
+  if (normalizedUsername.length < 3 || normalizedUsername.length > 30) {
+    return 'Username must be 3 to 30 characters.'
+  }
+
+  if (!/^[a-z0-9._-]+$/.test(normalizedUsername)) {
+    return 'Username can only use letters, numbers, dots, underscores, and hyphens.'
+  }
+
+  return null
+}
+
 export function validateAdminUsername(username: string) {
   const normalizedUsername = username.trim().toLowerCase()
 

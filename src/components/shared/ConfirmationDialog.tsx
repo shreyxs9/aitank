@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
 type ConfirmationDialogProps = {
   cancelLabel?: string
@@ -45,7 +46,7 @@ export function ConfirmationDialog({
     return null
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm">
       <div
         aria-describedby="confirmation-dialog-message"
@@ -77,6 +78,7 @@ export function ConfirmationDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

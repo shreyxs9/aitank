@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
+import { PasswordVisibilityToggle } from '../components/shared/PasswordVisibilityToggle'
 import { SupabaseNotice } from '../components/shared/SupabaseNotice'
 import { supabase } from '../lib/supabase'
 import {
@@ -16,6 +17,7 @@ export function AdminLoginPage() {
   const from = typeof location.state?.from === 'string' ? location.state.from : '/admin'
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -99,25 +101,39 @@ export function AdminLoginPage() {
                 />
               </label>
 
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-white/72">Password</span>
-                <input
-                  id="admin-password"
-                  name="adminPassword"
-                  value={password}
-                  onChange={(event) => {
-                    setPassword(event.target.value)
-                    setError(null)
-                  }}
-                  type="password"
-                  autoComplete="current-password"
-                  minLength={8}
-                  maxLength={128}
-                  required
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60"
-                  placeholder="Admin password"
-                />
-              </label>
+              <div>
+                <label
+                  htmlFor="admin-password"
+                  className="mb-2 block text-sm font-medium text-white/72"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="admin-password"
+                    name="adminPassword"
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(event.target.value)
+                      setError(null)
+                    }}
+                    type={isPasswordVisible ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    minLength={8}
+                    maxLength={128}
+                    required
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-14 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60"
+                    placeholder="Admin password"
+                  />
+                  <PasswordVisibilityToggle
+                    isVisible={isPasswordVisible}
+                    label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                    onToggle={() => {
+                      setIsPasswordVisible((currentValue) => !currentValue)
+                    }}
+                  />
+                </div>
+              </div>
 
               {error ? (
                 <p className="rounded-2xl border border-coral/20 bg-coral/10 px-4 py-3 text-sm text-coral">

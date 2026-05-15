@@ -27,7 +27,7 @@ create table if not exists public.articles (
   slug text not null unique,
   title text not null,
   deck text not null default '',
-  section text not null default 'Community',
+  section text not null default 'Contributor story',
   body text not null,
   cover_image_url text,
   tags text[] not null default '{}',

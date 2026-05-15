@@ -120,7 +120,7 @@ export function WriteArticlePage() {
         body: normalizedBody,
         coverImageUrl,
         deck: normalizedDeck,
-        section: 'Community',
+        section: 'Contributor story',
         status,
         tags: parsedTags,
         title: normalizedTitle,
@@ -435,7 +435,7 @@ export function WriteArticlePage() {
                 )}
                 <div className="space-y-4 p-5">
                   <div className="flex flex-wrap items-center gap-2 text-[0.68rem] uppercase tracking-[0.22em] text-white/40">
-                    <span>Community</span>
+                    <span>Contributor story</span>
                     <span>{status === 'pending_review' ? 'In review' : 'Draft'}</span>
                     <span>{bodyStats.readingTime} min</span>
                   </div>

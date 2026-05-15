@@ -8,6 +8,7 @@ import {
   deleteCommunityArticle,
   deleteProfilePicture,
   fetchMyArticles,
+  submitCommunityArticleForReview,
   updateProfileDetails,
   uploadProfilePicture,
 } from '../lib/communityArticles'
@@ -20,6 +21,7 @@ export function MyArticlesPage() {
   const [articles, setArticles] = useState<CommunityArticle[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [deletingArticleId, setDeletingArticleId] = useState<string | null>(null)
+  const [submittingArticleId, setSubmittingArticleId] = useState<string | null>(null)
   const [profilePicture, setProfilePicture] = useState<File | null>(null)
   const [profilePicturePreview, setProfilePicturePreview] = useState<string | null>(null)
   const [isSavingProfilePicture, setIsSavingProfilePicture] = useState(false)
@@ -216,6 +218,43 @@ export function MyArticlesPage() {
       setError(nextError)
     } finally {
       setDeletingArticleId(null)
+    }
+  }
+
+  async function handleSubmitForReview(article: CommunityArticle) {
+    if (!user) {
+      setError('You need to be signed in to submit articles for review.')
+      return
+    }
+
+    const validationError = validateUuid(article.id, 'Article ID') || validateUuid(user.id, 'User ID')
+
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
+    if (article.status !== 'draft' && article.status !== 'rejected') {
+      setError('Only draft or rejected articles can be sent for review.')
+      return
+    }
+
+    setError(null)
+    setSubmittingArticleId(article.id)
+
+    try {
+      const nextArticle = await submitCommunityArticleForReview(article.id, user.id)
+      setArticles((currentArticles) =>
+        currentArticles.map((currentArticle) =>
+          currentArticle.id === article.id ? nextArticle : currentArticle,
+        ),
+      )
+    } catch (caughtError) {
+      const nextError =
+        caughtError instanceof Error ? caughtError.message : 'Failed to submit the article.'
+      setError(nextError)
+    } finally {
+      setSubmittingArticleId(null)
     }
   }
 
@@ -471,6 +510,20 @@ export function MyArticlesPage() {
                     >
                       {article.status === 'published' ? 'Open live post' : 'Preview article'}
                     </Link>
+                    {article.status === 'draft' || article.status === 'rejected' ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleSubmitForReview(article)}
+                        disabled={submittingArticleId === article.id}
+                        className="rounded-full border border-[#7BFFB2]/25 bg-[#7BFFB2]/10 px-4 py-2 text-sm text-[#7BFFB2] transition hover:bg-[#7BFFB2] hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {submittingArticleId === article.id
+                          ? 'Submitting...'
+                          : article.status === 'rejected'
+                            ? 'Resubmit for review'
+                            : 'Send for review'}
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => void handleDelete(article)}

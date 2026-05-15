@@ -1,7 +1,9 @@
 import type { Article } from '../types/content'
 import type { CommunityArticle } from '../types/communityArticles'
+import { getIssueSummaryForDate } from './issues'
 
 export function communityArticleToEditorialArticle(article: CommunityArticle): Article {
+  const issue = getIssueSummaryForDate(article.publishedAt ?? article.createdAt)
   const paragraphs = article.body
     .split(/\n\s*\n/g)
     .map((entry) => entry.trim())
@@ -29,7 +31,7 @@ export function communityArticleToEditorialArticle(article: CommunityArticle): A
     authorDesignation: article.authorDesignation ?? undefined,
     role:
       article.authorDesignation ||
-      (article.status === 'published' ? 'Community contributor' : statusLabel),
+      (article.status === 'published' ? 'Contributor' : statusLabel),
     readTime: `${Math.max(3, Math.ceil(article.body.split(/\s+/).filter(Boolean).length / 180))} min read`,
     publishedAt: article.publishedAt
       ? new Date(article.publishedAt).toLocaleDateString('en-US', {
@@ -43,7 +45,7 @@ export function communityArticleToEditorialArticle(article: CommunityArticle): A
     imageAlt: article.coverImageUrl ? article.title : undefined,
     tags: article.tags,
     highlight: article.deck,
-    breadcrumb: ['Community', article.section],
+    breadcrumb: [`Issue ${issue.issueNumber}`, article.section],
     intro: paragraphs[0] || article.deck,
     heroCaption:
       article.coverImageUrl
@@ -79,7 +81,7 @@ export function communityArticleToEditorialArticle(article: CommunityArticle): A
       },
       {
         title: 'Tags',
-        items: article.tags.length ? article.tags : ['Community'],
+        items: article.tags.length ? article.tags : ['Contributor'],
       },
     ],
   }

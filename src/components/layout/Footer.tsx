@@ -1,7 +1,22 @@
+import { useState } from 'react'
+import type { MouseEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../auth/useAuth'
 import { IssueSignupSection } from './IssueSignupSection'
 
 export function Footer() {
+  const { user } = useAuth()
+  const [showAuthNotice, setShowAuthNotice] = useState(false)
+
+  function handleWriteArticleClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (user) {
+      return
+    }
+
+    event.preventDefault()
+    setShowAuthNotice(true)
+  }
+
   return (
     <>
       <IssueSignupSection />
@@ -22,7 +37,11 @@ export function Footer() {
               <Link to="/" className="block text-sm text-white/72 transition hover:text-white">
                 Current issue
               </Link>
-              <Link to="/write" className="block text-sm text-white/72 transition hover:text-white">
+              <Link
+                to="/write"
+                onClick={handleWriteArticleClick}
+                className="block text-sm text-white/72 transition hover:text-white"
+              >
                 Write article
               </Link>
               <Link
@@ -48,6 +67,46 @@ export function Footer() {
           </div>
         </div>
       </footer>
+      {showAuthNotice ? (
+        <div
+          aria-live="polite"
+          className="fixed bottom-5 left-4 right-4 z-[60] mx-auto max-w-md rounded-2xl border border-coral/25 bg-ink/95 p-4 text-white shadow-[0_24px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:left-auto sm:right-6 sm:mx-0"
+          role="status"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-white">Login or create an account</p>
+              <p className="mt-1 text-sm leading-6 text-white/62">
+                You need a contributor account before writing an article.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAuthNotice(false)}
+              className="rounded-full border border-white/10 px-2.5 py-1 text-sm text-white/58 transition hover:bg-white/6 hover:text-white"
+              aria-label="Dismiss notification"
+            >
+              x
+            </button>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              to="/login"
+              onClick={() => setShowAuthNotice(false)}
+              className="rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#ff8c72]"
+            >
+              Login
+            </Link>
+            <Link
+              to="/login?mode=signup"
+              onClick={() => setShowAuthNotice(false)}
+              className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-white/72 transition hover:border-coral/40 hover:text-coral"
+            >
+              Sign up
+            </Link>
+          </div>
+        </div>
+      ) : null}
     </>
   )
 }

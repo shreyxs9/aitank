@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../components/auth/useAuth'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
+import { PasswordVisibilityToggle } from '../components/shared/PasswordVisibilityToggle'
 import { SupabaseNotice } from '../components/shared/SupabaseNotice'
 import { supabase } from '../lib/supabase'
 import { validatePassword } from '../lib/validation'
@@ -115,19 +116,16 @@ export function ResetPasswordPage() {
                     minLength={6}
                     maxLength={128}
                     required
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-20 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-14 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60"
                     placeholder="Minimum 6 characters"
                   />
-                  <button
-                    type="button"
-                    onClick={() => {
+                  <PasswordVisibilityToggle
+                    isVisible={isPasswordVisible}
+                    label={isPasswordVisible ? 'Hide new password' : 'Show new password'}
+                    onToggle={() => {
                       setIsPasswordVisible((currentValue) => !currentValue)
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/58 transition hover:border-coral/50 hover:text-coral"
-                    aria-label={isPasswordVisible ? 'Hide new password' : 'Show new password'}
-                  >
-                    {isPasswordVisible ? 'Hide' : 'Show'}
-                  </button>
+                  />
                 </div>
               </label>
 
@@ -149,23 +147,20 @@ export function ResetPasswordPage() {
                     minLength={6}
                     maxLength={128}
                     required
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-20 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-14 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60"
                     placeholder="Repeat your new password"
                   />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsConfirmPasswordVisible((currentValue) => !currentValue)
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/58 transition hover:border-coral/50 hover:text-coral"
-                    aria-label={
+                  <PasswordVisibilityToggle
+                    isVisible={isConfirmPasswordVisible}
+                    label={
                       isConfirmPasswordVisible
                         ? 'Hide confirmed password'
                         : 'Show confirmed password'
                     }
-                  >
-                    {isConfirmPasswordVisible ? 'Hide' : 'Show'}
-                  </button>
+                    onToggle={() => {
+                      setIsConfirmPasswordVisible((currentValue) => !currentValue)
+                    }}
+                  />
                 </div>
               </label>
 

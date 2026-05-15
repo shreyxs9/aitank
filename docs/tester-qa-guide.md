@@ -64,7 +64,7 @@ Expected result: public pages load normally, protected contributor pages redirec
 4. Verify article links route to `/article/{slug}`.
 5. Refresh the homepage.
 
-Expected result: static editorial content appears for all users. Admin-approved community articles should appear in the community section. Draft, pending, and rejected articles should not appear on the homepage.
+Expected result: static editorial content appears for all users. Admin-approved contributor articles should appear under the matching monthly issue. Draft, pending, and rejected articles should not appear on the homepage.
 
 ### Article Page
 
@@ -245,7 +245,7 @@ Expected result: review queue loads and pending submissions are inspectable befo
 3. Wait for the button state to finish.
 4. Confirm status changes to "Approved".
 5. Open homepage in a signed-out or fresh browser session.
-6. Confirm the article appears in the community articles section.
+6. Confirm the article appears under the matching monthly issue.
 7. Open the article URL.
 
 Expected result: approved articles become public.

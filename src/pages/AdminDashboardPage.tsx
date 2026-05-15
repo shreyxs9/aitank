@@ -19,6 +19,7 @@ export function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [updatingArticleId, setUpdatingArticleId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false)
 
   const stats = useMemo(
@@ -91,15 +92,22 @@ export function AdminDashboardPage() {
     }
 
     setError(null)
+    setNotice(null)
     setUpdatingArticleId(article.id)
 
     try {
-      const nextArticle = await updateArticleReviewStatus(article.id, status)
+      const { article: nextArticle, emailDelivery } = await updateArticleReviewStatus(
+        article.id,
+        status,
+      )
       setArticles((currentArticles) =>
         currentArticles.map((currentArticle) =>
           currentArticle.id === article.id ? nextArticle : currentArticle,
         ),
       )
+      if (!emailDelivery.sent) {
+        setNotice(emailDelivery.error)
+      }
     } catch (caughtError) {
       const nextError =
         caughtError instanceof Error ? caughtError.message : 'Failed to update article status.'
@@ -255,6 +263,7 @@ export function AdminDashboardPage() {
                   onClick={() => {
                     setActiveFilter(item.value)
                     setError(null)
+                    setNotice(null)
                   }}
                   className={`flex min-h-11 items-center gap-2 rounded-full px-4 text-sm transition ${
                     activeFilter === item.value
@@ -275,6 +284,12 @@ export function AdminDashboardPage() {
                 </button>
               ))}
             </div>
+
+            {notice ? (
+              <div className="rounded-[1.5rem] border border-yellow-300/30 bg-yellow-300/10 p-5 text-sm leading-6 text-yellow-100">
+                {notice}
+              </div>
+            ) : null}
 
             {filteredArticles.length === 0 ? (
               <div className="rounded-[2rem] border border-white/10 bg-white/4 p-8">

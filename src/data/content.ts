@@ -1,11 +1,7 @@
 import type { Article, FounderSpotlight, IssueSummary, SectionBlock } from '../types/content'
+import { getIssueSummaryForDate } from '../lib/issues'
 
-export const issueSummary: IssueSummary = {
-  issueNumber: '001',
-  issueLabel: 'Signals From The Human Layer',
-  releaseDate: 'April 2026',
-  strapline: 'A monthly field guide to the people, products, and patterns shaping applied AI.',
-}
+const fallbackIssueSummary: IssueSummary = getIssueSummaryForDate(new Date(2026, 4, 1))
 
 export const articles: Article[] = [
   {
@@ -327,6 +323,134 @@ export const articles: Article[] = [
         src: '/articles/fintech-trust-engine/page-7.png',
         alt: 'Page 7 of the Krishna Potnis PDF article.',
         caption: 'PDF page 7',
+      },
+    ],
+  },
+  {
+    id: 'fintech-ai-strategic-layer',
+    slug: 'from-rules-engines-to-probabilistic-intelligence',
+    section: 'Fintech intelligence',
+    sectionIndex: '01',
+    sectionTone: 'lavender',
+    title: 'From Rules Engines to Probabilistic Intelligence',
+    deck:
+      'Krishna Potnis explains why data annotation is becoming the strategic layer that lets fintech AI move from static rules to intent-aware risk, compliance, underwriting, and enrichment systems.',
+    author: 'Krishna Potnis',
+    authorAvatarUrl: '/people/krishna-potnis.jpeg',
+    role: 'Fintech Transformation & AI Strategy',
+    readTime: '6 min read',
+    publishedAt: 'May 15, 2026',
+    imageLabel: 'Before and after annotation view of fintech fraud intelligence',
+    imageSrc: '/articles/fintech-data-annotation-strategic-layer/image1.png',
+    imageAlt:
+      'Two scatter plots showing raw transaction behavior before annotation and a supervised fraud decision boundary after annotation.',
+    tags: ['Fintech AI', 'Data annotation', 'Risk intelligence'],
+    highlight:
+      'The future of financial AI depends not only on algorithms, but on the operational intelligence feeding those algorithms.',
+    breadcrumb: ['Issue 002', 'Fintech intelligence'],
+    intro:
+      'Digital payments spent decades relying on static IF-THEN rules. Modern fintech now needs probabilistic systems that understand behavior, context, intent, and risk in real time.',
+    heroCaption:
+      'The first embedded graphic from the submitted article shows how annotation turns raw transaction clusters into supervised fraud intelligence.',
+    pullQuote: {
+      quote:
+        'Data annotation is no longer a back-office operational task. It is rapidly becoming a strategic intelligence layer.',
+      attribution: 'Krishna Potnis',
+    },
+    body: [
+      {
+        heading: 'Introduction',
+        paragraphs: [
+          'For over two decades, digital payments systems relied heavily on rule-based engines driven by static IF-THEN logic such as blocking a transaction when the amount crosses a fixed threshold.',
+          'Modern fintech requires something far more intelligent. AI-driven platforms now evaluate behavioral patterns, device fingerprinting, geo-velocity, transaction sequences, and contextual risk signals in real time to estimate the probability that a transaction represents account takeover or fraud.',
+          'At the center of this transformation lies data annotation: the process of converting raw transactional data into machine-understandable intelligence so systems can recognize intent, patterns, and risk with greater precision.',
+        ],
+      },
+      {
+        heading: 'Fraud detection: from anomaly to intent',
+        paragraphs: [
+          'Traditional fraud systems focused primarily on anomaly detection. If a transaction looked unusual, it was flagged.',
+          'Modern fraud ecosystems involve coordinated attacks, synthetic identities, bot-driven card testing, mule accounts, and AI-assisted fraud orchestration. Annotation helps AI systems move beyond detecting difference and begin understanding behavioral intent.',
+        ],
+        figures: [
+          {
+            src: '/articles/fintech-data-annotation-strategic-layer/image1.png',
+            alt: 'Before and after annotation comparison for fintech fraud detection.',
+            caption:
+              'Before annotation, raw points lack ground truth. After annotation, supervised labels allow the model to draw a decision boundary.',
+          },
+        ],
+      },
+      {
+        heading: 'GDPR, PII, and context-aware compliance AI',
+        paragraphs: [
+          'Financial institutions process enormous amounts of unstructured data through logs, support tickets, onboarding workflows, and transaction descriptors.',
+          'Using named entity recognition, annotated datasets teach AI systems to identify and redact sensitive information such as names, addresses, account numbers, and transaction identifiers while preserving operational intelligence for analytics.',
+          'For example, a log may mention John Smith, transaction TXN991, 221B Baker St, and Rose Florist. Annotation can teach the system that John Smith is a person, TXN991 is a transaction ID, 221B Baker St is an address, and Rose Florist is a merchant rather than PII.',
+          'The result is a GDPR-compliant model that can redact person and address labels while keeping merchant data available for business analytics.',
+        ],
+      },
+      {
+        heading: 'Credit underwriting and bias correction',
+        paragraphs: [
+          'Traditional underwriting models relied heavily on bureau scores and historical financial records.',
+          'Modern fintech platforms can annotate alternative behavioral data such as utility payments, wallet activity, subscription consistency, and digital transaction behavior to improve financial inclusion and reduce systemic bias.',
+        ],
+        figures: [
+          {
+            src: '/articles/fintech-data-annotation-strategic-layer/image2.png',
+            alt: 'Before and after annotation comparison for fairer thin-file credit underwriting.',
+            caption:
+              'Annotation can help underwriting systems distinguish reliable thin-file applicants from weak historical bureau proxies.',
+          },
+        ],
+      },
+      {
+        heading: 'Transaction enrichment',
+        paragraphs: [
+          'Raw payment descriptors are often cryptic and operationally difficult to interpret. Annotation enables AI systems to identify merchant identity, category, geography, and spending behavior from fragmented transaction strings.',
+        ],
+        bullets: [
+          'SQ * BILLS COFFEE -> Coffee Shop',
+          'AMZ MKTPLACE PMTS -> E-Commerce',
+          'PP*STREAMSERV -> Subscription Services',
+        ],
+        figures: [
+          {
+            src: '/articles/fintech-data-annotation-strategic-layer/image3.png',
+            alt: 'Before and after annotation comparison for merchant transaction enrichment.',
+            caption:
+              'Annotated merchant strings let the system map noisy payment descriptors into useful spending categories.',
+          },
+        ],
+      },
+      {
+        heading: 'Human-in-the-loop expertise',
+        paragraphs: [
+          'Despite rapid advances in AI, financial intelligence systems still depend on fraud analysts, risk investigators, and compliance specialists to validate, refine, and annotate emerging patterns.',
+          'Human expertise remains central to reducing model drift and identifying new fraud vectors.',
+        ],
+      },
+      {
+        heading: 'Conclusion',
+        paragraphs: [
+          'Data annotation is no longer a back-office operational task. It is rapidly becoming a strategic intelligence layer that directly influences fraud prevention, customer experience, underwriting quality, regulatory compliance, and AI competitiveness across the fintech ecosystem.',
+          'The future of financial AI will depend not only on algorithms, but on the quality of operational intelligence feeding those algorithms.',
+        ],
+      },
+    ],
+    sidebar: [
+      {
+        title: 'Strategic layer',
+        items: ['Fraud intent detection', 'Context-aware compliance', 'Credit bias correction'],
+      },
+      {
+        title: 'Annotation outcomes',
+        items: ['Ground truth labels', 'PII recognition', 'Merchant enrichment'],
+      },
+      {
+        title: 'Human expertise',
+        items: ['Fraud analysts', 'Risk investigators', 'Compliance specialists'],
       },
     ],
   },
@@ -830,7 +954,6 @@ const getArticleById = (id: string) => {
   return article
 }
 
-const pickArticles = (ids: string[]) => ids.map(getArticleById)
 const shuffleArticles = <T,>(items: T[]) => {
   const shuffled = [...items]
 
@@ -842,19 +965,33 @@ const shuffleArticles = <T,>(items: T[]) => {
   return shuffled
 }
 
-const homepageArticlePool = shuffleArticles(
-  pickArticles([
-    'cover-story',
-    'signal-essay',
-    'beta-training',
-    'strategy-brief',
-    'policy-essay',
-    'ai-ops-skillset',
-  ]),
+const getIssueSummaryForArticle = (article: Article): IssueSummary => {
+  return getIssueSummaryForDate(article.publishedAt)
+}
+
+export const issueArticleGroups = Array.from(
+  articles
+    .reduce((groups, article) => {
+      const issue = getIssueSummaryForArticle(article)
+      const existingGroup = groups.get(issue.issueNumber)
+
+      if (existingGroup) {
+        existingGroup.articles.push(article)
+      } else {
+        groups.set(issue.issueNumber, { issue, articles: [article] })
+      }
+
+      return groups
+    }, new Map<string, { issue: IssueSummary; articles: Article[] }>())
+    .values(),
+).sort((firstGroup, secondGroup) =>
+  secondGroup.issue.issueNumber.localeCompare(firstGroup.issue.issueNumber),
 )
 
-export const featuredArticle = homepageArticlePool[0]
-export const editorialGridArticles = homepageArticlePool.slice(1)
+export const issueSummary = issueArticleGroups[0]?.issue ?? fallbackIssueSummary
+export const featuredArticle = issueArticleGroups[0]?.articles[0] ?? getArticleById('cover-story')
+export const editorialGridArticles = issueArticleGroups[0]?.articles.slice(1) ?? []
+export const issueArchiveGroups = issueArticleGroups.slice(1)
 export const secondaryRowArticles = shuffleArticles<Article>([])
 
 export const founders: FounderSpotlight[] = [

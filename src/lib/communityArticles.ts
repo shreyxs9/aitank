@@ -1,3 +1,4 @@
+import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from '@supabase/supabase-js'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { slugify } from './slug'
@@ -13,6 +14,7 @@ import {
   validateImageFile,
   validateProfileImageFile,
   validateTags,
+  validateUsername,
   validateUuid,
 } from './validation'
 import type { CommunityArticle, CommunityArticleDraft } from '../types/communityArticles'
@@ -27,6 +29,34 @@ type AdminReviewArticleRow = ArticleRow & {
   author_designation: string | null
   author_display_name: string | null
   author_username: string | null
+}
+type ReviewEmailDelivery =
+  | {
+      sent: true
+    }
+  | {
+      error: string
+      sent: false
+    }
+
+type ArticleReviewStatusUpdateResult = {
+  article: CommunityArticle
+  emailDelivery: ReviewEmailDelivery
+}
+
+async function getFunctionHttpErrorMessage(error: FunctionsHttpError) {
+  try {
+    const context = error.context as Response | undefined
+    const payload = await context?.clone().json()
+
+    if (payload && typeof payload.error === 'string') {
+      return payload.error
+    }
+  } catch {
+    // Keep the original Supabase error message when the function body is not JSON.
+  }
+
+  return error.message
 }
 
 function getAdminRpcErrorMessage(error: { code?: string; message?: string }) {
@@ -76,6 +106,42 @@ function toCommunityArticle(article: ArticleRow, profile?: ProfileRow | null): C
     title: article.title,
     updatedAt: article.updated_at,
   }
+}
+
+async function updateArticleReviewStatusViaRpc(
+  articleId: string,
+  status: 'published' | 'rejected',
+) {
+  const { data, error } = await supabase!.rpc('admin_update_article_review_status', {
+    admin_password: HARDCODED_ADMIN_PASSWORD,
+    article_id: articleId,
+    next_status: status,
+  })
+
+  if (error) {
+    throw new Error(`Article review update failed: ${getAdminRpcErrorMessage(error)}`)
+  }
+
+  const article = (data as AdminReviewArticleRow[] | null)?.[0]
+
+  if (!article) {
+    throw new Error('Article review update failed: database returned no article.')
+  }
+
+  return article
+}
+
+function toAdminReviewCommunityArticle(article: AdminReviewArticleRow) {
+  return toCommunityArticle(article, {
+    id: article.author_id,
+    avatar_url: article.author_avatar_url,
+    bio: null,
+    created_at: '',
+    designation: article.author_designation,
+    display_name: article.author_display_name,
+    updated_at: '',
+    username: article.author_username,
+  })
 }
 
 export async function ensureProfile(user: User) {
@@ -165,6 +231,7 @@ export async function updateProfileDetails(
     avatarUrl?: string | null
     designation?: string | null
     displayName?: string | null
+    username?: string | null
   },
 ) {
   if (!supabase) {
@@ -175,6 +242,8 @@ export async function updateProfileDetails(
     typeof details.designation === 'string' ? normalizeWhitespace(details.designation) : null
   const normalizedDisplayName =
     typeof details.displayName === 'string' ? normalizeWhitespace(details.displayName) : null
+  const normalizedUsername =
+    typeof details.username === 'string' ? details.username.trim().toLowerCase() : null
   const validationError =
     validateUuid(userId, 'User ID') ||
     (details.displayName !== undefined && normalizedDisplayName
@@ -182,6 +251,9 @@ export async function updateProfileDetails(
       : null) ||
     (details.designation !== undefined && normalizedDesignation
       ? validateDesignation(normalizedDesignation)
+      : null) ||
+    (details.username !== undefined && normalizedUsername
+      ? validateUsername(normalizedUsername)
       : null)
 
   if (validationError) {
@@ -200,6 +272,10 @@ export async function updateProfileDetails(
 
   if (details.displayName !== undefined) {
     payload.display_name = normalizedDisplayName
+  }
+
+  if (details.username !== undefined) {
+    payload.username = normalizedUsername
   }
 
   const { data, error } = await supabase
@@ -513,7 +589,7 @@ export async function fetchAdminReviewArticles() {
 export async function updateArticleReviewStatus(
   articleId: string,
   status: 'published' | 'rejected',
-) {
+): Promise<ArticleReviewStatusUpdateResult> {
   if (!supabase) {
     throw new Error('Supabase is not configured.')
   }
@@ -526,29 +602,114 @@ export async function updateArticleReviewStatus(
     throw new Error(validationError)
   }
 
-  const { data, error } = await supabase
-    .rpc('admin_update_article_review_status', {
+  let article: AdminReviewArticleRow | null = null
+  let emailDelivery: ReviewEmailDelivery = { sent: true }
+  let functionErrorMessage: string | null = null
+  const { data, error } = await supabase.functions.invoke<{
+    article: AdminReviewArticleRow
+    email_delivery?: ReviewEmailDelivery
+  }>('send-article-review-email', {
+    body: {
       admin_password: HARDCODED_ADMIN_PASSWORD,
       article_id: articleId,
       next_status: status,
+    },
+  })
+
+  if (error) {
+    if (error instanceof FunctionsHttpError) {
+      functionErrorMessage = await getFunctionHttpErrorMessage(error)
+    } else {
+      functionErrorMessage = error.message
+    }
+
+    if (
+      error instanceof FunctionsFetchError ||
+      error instanceof FunctionsRelayError ||
+      (error instanceof FunctionsHttpError &&
+        functionErrorMessage ===
+          'Review email function is missing required environment variables.')
+    ) {
+      article = await updateArticleReviewStatusViaRpc(articleId, status)
+      emailDelivery = {
+        error: `Review email was not sent because the Edge Function could not complete: ${functionErrorMessage}`,
+        sent: false,
+      }
+      console.warn(
+        `Article status was updated without sending the review email: ${functionErrorMessage}`,
+      )
+    } else {
+      throw new Error(`Article review update failed: ${functionErrorMessage}`)
+    }
+  }
+
+  if (!article && data?.article) {
+    article = data.article
+    emailDelivery = data.email_delivery ?? { sent: true }
+  }
+
+  if (!article) {
+    throw new Error('Article review update failed: email function returned no article.')
+  }
+
+  return {
+    article: toAdminReviewCommunityArticle(article),
+    emailDelivery,
+  }
+}
+
+export async function submitCommunityArticleForReview(articleId: string, authorId: string) {
+  if (!supabase) {
+    throw new Error('Supabase is not configured.')
+  }
+
+  const validationError =
+    validateUuid(articleId, 'Article ID') || validateUuid(authorId, 'Author ID')
+
+  if (validationError) {
+    throw new Error(validationError)
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError) {
+    throw userError
+  }
+
+  if (!user || user.id !== authorId) {
+    throw new Error('Your session is missing or does not match this author.')
+  }
+
+  const { data, error } = await supabase
+    .from('articles')
+    .update({
+      published_at: null,
+      status: 'pending_review',
     })
+    .eq('id', articleId)
+    .eq('author_id', authorId)
+    .in('status', ['draft', 'rejected'])
+    .select()
     .single()
 
   if (error) {
-    throw new Error(`Article review update failed: ${getAdminRpcErrorMessage(error)}`)
+    throw new Error(`Article submission failed: ${error.message}`)
   }
 
-  const article = data as AdminReviewArticleRow
+  const profile = await getProfile(authorId)
 
-  return toCommunityArticle(article, {
-    id: article.author_id,
-    avatar_url: article.author_avatar_url,
-    bio: null,
+  return toCommunityArticle(data, profile && {
+    id: profile.id,
+    avatar_url: profile.avatarUrl,
+    bio: profile.bio,
     created_at: '',
-    designation: article.author_designation,
-    display_name: article.author_display_name,
+    designation: profile.designation,
+    display_name: profile.displayName,
     updated_at: '',
-    username: article.author_username,
+    username: profile.username,
   })
 }
 

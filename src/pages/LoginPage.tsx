@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
+import { PasswordVisibilityToggle } from '../components/shared/PasswordVisibilityToggle'
 import { SupabaseNotice } from '../components/shared/SupabaseNotice'
 import { useAuth } from '../components/auth/useAuth'
 import { supabase } from '../lib/supabase'
@@ -32,7 +33,8 @@ export function LoginPage() {
   const location = useLocation()
   const from = typeof location.state?.from === 'string' ? location.state.from : '/write'
   const { isConfigured, user } = useAuth()
-  const [mode, setMode] = useState<AuthMode>('login')
+  const initialMode = new URLSearchParams(location.search).get('mode') === 'signup' ? 'signup' : 'login'
+  const [mode, setMode] = useState<AuthMode>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -248,6 +250,22 @@ export function LoginPage() {
     setPendingConfirmationEmail(null)
 
     try {
+      const { data: isEmailRegistered, error: emailCheckError } = await supabase.rpc(
+        'email_is_registered',
+        {
+          email_to_check: normalizedEmail,
+        },
+      )
+
+      if (emailCheckError) {
+        throw new Error(getEmailCheckErrorMessage(emailCheckError))
+      }
+
+      if (!isEmailRegistered) {
+        setError('No contributor account was found for this email address.')
+        return
+      }
+
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
         redirectTo: `${window.location.origin}/reset-password`,
       })
@@ -548,19 +566,16 @@ export function LoginPage() {
                       minLength={6}
                       maxLength={128}
                       required
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-20 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-14 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
                       placeholder="Minimum 6 characters"
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
+                    <PasswordVisibilityToggle
+                      isVisible={isPasswordVisible}
+                      label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                      onToggle={() => {
                         setIsPasswordVisible((currentValue) => !currentValue)
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/58 transition hover:border-coral/50 hover:text-coral"
-                      aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
-                    >
-                      {isPasswordVisible ? 'Hide' : 'Show'}
-                    </button>
+                    />
                   </div>
                 </div>
 
@@ -586,23 +601,20 @@ export function LoginPage() {
                         minLength={6}
                         maxLength={128}
                         required
-                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-20 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 pr-14 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
                         placeholder="Repeat your password"
                       />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsConfirmPasswordVisible((currentValue) => !currentValue)
-                        }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/58 transition hover:border-coral/50 hover:text-coral"
-                        aria-label={
+                      <PasswordVisibilityToggle
+                        isVisible={isConfirmPasswordVisible}
+                        label={
                           isConfirmPasswordVisible
                             ? 'Hide confirmed password'
                             : 'Show confirmed password'
                         }
-                      >
-                        {isConfirmPasswordVisible ? 'Hide' : 'Show'}
-                      </button>
+                        onToggle={() => {
+                          setIsConfirmPasswordVisible((currentValue) => !currentValue)
+                        }}
+                      />
                     </div>
                   </div>
                 ) : null}

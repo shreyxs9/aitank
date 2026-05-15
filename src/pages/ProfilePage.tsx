@@ -4,7 +4,14 @@ import { useAuth } from '../components/auth/useAuth'
 import { Footer } from '../components/layout/Footer'
 import { Header } from '../components/layout/Header'
 import { SupabaseNotice } from '../components/shared/SupabaseNotice'
-import { fetchMyArticles } from '../lib/communityArticles'
+import { fetchMyArticles, updateProfileDetails } from '../lib/communityArticles'
+import { supabase } from '../lib/supabase'
+import {
+  normalizeWhitespace,
+  validateDesignation,
+  validateDisplayName,
+  validateUsername,
+} from '../lib/validation'
 import type { CommunityArticle } from '../types/communityArticles'
 
 function formatDate(date: string | undefined) {
@@ -22,8 +29,14 @@ function formatDate(date: string | undefined) {
 export function ProfilePage() {
   const { isConfigured, profile, refreshProfile, user } = useAuth()
   const [articles, setArticles] = useState<CommunityArticle[]>([])
+  const [displayName, setDisplayName] = useState('')
+  const [username, setUsername] = useState('')
+  const [designation, setDesignation] = useState('')
   const [isLoadingArticles, setIsLoadingArticles] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [activityError, setActivityError] = useState<string | null>(null)
+  const [profileError, setProfileError] = useState<string | null>(null)
+  const [profileMessage, setProfileMessage] = useState<string | null>(null)
 
   const articleStats = useMemo(
     () => ({
@@ -56,7 +69,7 @@ export function ProfilePage() {
         if (!cancelled) {
           const nextError =
             caughtError instanceof Error ? caughtError.message : 'Failed to load profile details.'
-          setError(nextError)
+          setActivityError(nextError)
         }
       } finally {
         if (!cancelled) {
@@ -71,6 +84,67 @@ export function ProfilePage() {
       cancelled = true
     }
   }, [refreshProfile, user])
+
+  useEffect(() => {
+    setDisplayName(profile?.displayName ?? '')
+    setUsername(profile?.username ?? '')
+    setDesignation(profile?.designation ?? '')
+  }, [profile?.designation, profile?.displayName, profile?.username])
+
+  async function handleSaveProfile(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!user || !supabase) {
+      return
+    }
+
+    const normalizedDisplayName = normalizeWhitespace(displayName)
+    const normalizedUsername = username.trim().toLowerCase()
+    const normalizedDesignation = normalizeWhitespace(designation)
+    const validationError =
+      validateDisplayName(normalizedDisplayName) ||
+      validateUsername(normalizedUsername) ||
+      validateDesignation(normalizedDesignation)
+
+    if (validationError) {
+      setProfileError(validationError)
+      setProfileMessage(null)
+      return
+    }
+
+    setIsSavingProfile(true)
+    setProfileError(null)
+    setProfileMessage(null)
+
+    try {
+      await updateProfileDetails(user.id, {
+        designation: normalizedDesignation || null,
+        displayName: normalizedDisplayName || null,
+        username: normalizedUsername || null,
+      })
+
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: {
+          designation: normalizedDesignation || null,
+          display_name: normalizedDisplayName || null,
+          user_name: normalizedUsername || null,
+        },
+      })
+
+      if (metadataError) {
+        throw metadataError
+      }
+
+      await refreshProfile()
+      setProfileMessage('Profile details updated.')
+    } catch (caughtError) {
+      const nextError =
+        caughtError instanceof Error ? caughtError.message : 'Failed to update profile details.'
+      setProfileError(nextError)
+    } finally {
+      setIsSavingProfile(false)
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -142,12 +216,88 @@ export function ProfilePage() {
               <h2 className="text-xl font-bold tracking-[-0.03em] text-white">
                 Account information
               </h2>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+
+              <form className="mt-5 grid gap-4" onSubmit={handleSaveProfile}>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-white/72">
+                    Display name
+                  </span>
+                  <input
+                    id="profile-display-name"
+                    name="displayName"
+                    value={displayName}
+                    onChange={(event) => {
+                      setDisplayName(event.target.value)
+                      setProfileError(null)
+                      setProfileMessage(null)
+                    }}
+                    autoComplete="name"
+                    maxLength={60}
+                    className="w-full rounded-2xl border border-white/10 bg-black/16 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                    placeholder="Your byline"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-white/72">Username</span>
+                  <input
+                    id="profile-username"
+                    name="username"
+                    value={username}
+                    onChange={(event) => {
+                      setUsername(event.target.value)
+                      setProfileError(null)
+                      setProfileMessage(null)
+                    }}
+                    autoComplete="username"
+                    maxLength={30}
+                    className="w-full rounded-2xl border border-white/10 bg-black/16 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                    placeholder="your-username"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-white/72">
+                    Designation
+                  </span>
+                  <input
+                    id="profile-designation"
+                    name="designation"
+                    value={designation}
+                    onChange={(event) => {
+                      setDesignation(event.target.value)
+                      setProfileError(null)
+                      setProfileMessage(null)
+                    }}
+                    autoComplete="organization-title"
+                    maxLength={90}
+                    className="w-full rounded-2xl border border-white/10 bg-black/16 px-4 py-3.5 text-white outline-none transition placeholder:text-white/28 focus:border-coral/60 focus:bg-white/[0.07]"
+                    placeholder="Founder, AI researcher, product lead"
+                  />
+                </label>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="submit"
+                    disabled={isSavingProfile}
+                    className="rounded-full border border-coral/25 bg-coral px-5 py-3 text-sm font-medium text-white transition hover:bg-[#ff8c72] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSavingProfile ? 'Saving...' : 'Save profile'}
+                  </button>
+                  {profileMessage ? (
+                    <p className="text-sm text-[#7BFFB2]">{profileMessage}</p>
+                  ) : null}
+                </div>
+                {profileError ? (
+                  <p className="rounded-2xl border border-coral/20 bg-coral/10 px-4 py-3 text-sm text-coral">
+                    {profileError}
+                  </p>
+                ) : null}
+              </form>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {[
                   ['Email', user?.email || 'Not available'],
-                  ['Display name', profile?.displayName || 'Not added'],
-                  ['Username', profile?.username || 'Not set'],
-                  ['Designation', profile?.designation || 'Not added'],
                   ['Account created', formatDate(user?.created_at)],
                   ['User ID', user?.id || 'Not available'],
                 ].map(([label, value]) => (
@@ -178,7 +328,7 @@ export function ProfilePage() {
                 <h2 className="text-xl font-bold tracking-[-0.03em] text-white">
                   Publishing activity
                 </h2>
-                {error ? <p className="text-sm text-coral">{error}</p> : null}
+                {activityError ? <p className="text-sm text-coral">{activityError}</p> : null}
               </div>
 
               {isLoadingArticles ? (

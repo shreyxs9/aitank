@@ -30,12 +30,29 @@ The updated schema now:
 - `/write` is protected and lets a signed-in user create drafts or submit articles for review.
 - `/my-articles` lists the current user's submissions.
 - `/article/:slug` falls back to Supabase when the slug is not in the local mock content file.
-- The homepage only renders community articles with `status = 'published'`.
+- The homepage only renders contributor articles with `status = 'published'`, grouped into the matching monthly issue by `published_at`.
 - Admin-approved submissions are rows with `status = 'published'`.
 
 ## Temporary admin setup
 
 Run `supabase/schema.sql` again so the temporary review RPC functions exist.
+
+Deploy the review email Edge Function and set its server-side secrets:
+
+```sh
+supabase functions deploy send-article-review-email --no-verify-jwt
+supabase secrets set SMTP_HOST=smtp.your-provider.com
+supabase secrets set SMTP_PORT=587
+supabase secrets set SMTP_USER=your_smtp_username
+supabase secrets set SMTP_PASS=your_smtp_password
+supabase secrets set SMTP_SECURE=false
+supabase secrets set REVIEW_NOTIFICATION_FROM="AI Tank <notifications@your-domain.com>"
+supabase secrets set SITE_URL=https://your-site-domain.com
+```
+
+When an admin approves or rejects a submission, the app calls this Edge Function. The function
+updates the article status and sends the contributor an approval or rejection email through SMTP.
+Use the same SMTP provider and credentials configured for Supabase Auth emails.
 
 Admins sign in at `/admin/login` with:
 
