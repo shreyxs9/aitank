@@ -120,128 +120,138 @@ as $$
   );
 $$;
 
-create or replace function public.admin_fetch_review_articles(admin_password text)
-returns table (
-  author_id uuid,
-  body text,
-  cover_image_url text,
-  created_at timestamptz,
-  deck text,
-  id uuid,
-  published_at timestamptz,
-  section text,
-  slug text,
-  status text,
-  tags text[],
-  title text,
-  updated_at timestamptz,
-  author_display_name text,
-  author_designation text,
-  author_avatar_url text,
-  author_username text
-)
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select
-    articles.author_id,
-    articles.body,
-    articles.cover_image_url,
-    articles.created_at,
-    articles.deck,
-    articles.id,
-    articles.published_at,
-    articles.section,
-    articles.slug,
-    articles.status,
-    articles.tags,
-    articles.title,
-    articles.updated_at,
-    profiles.display_name as author_display_name,
-    profiles.designation as author_designation,
-    profiles.avatar_url as author_avatar_url,
-    profiles.username as author_username
-  from public.articles
-  left join public.profiles
-    on profiles.id = articles.author_id
-  where public.is_hardcoded_admin(admin_password)
-    and articles.status in ('pending_review', 'published', 'rejected')
-  order by articles.created_at desc;
-$$;
-
-create or replace function public.admin_update_article_review_status(
-  admin_password text,
-  article_id uuid,
-  next_status text
-)
-returns table (
-  author_id uuid,
-  body text,
-  cover_image_url text,
-  created_at timestamptz,
-  deck text,
-  id uuid,
-  published_at timestamptz,
-  section text,
-  slug text,
-  status text,
-  tags text[],
-  title text,
-  updated_at timestamptz,
-  author_display_name text,
-  author_designation text,
-  author_avatar_url text,
-  author_username text
-)
-language plpgsql
-security definer
-set search_path = public
-as $$
+do $$
 begin
-  if not public.is_hardcoded_admin(admin_password) then
-    raise exception 'Invalid admin credentials';
+  if to_regprocedure('public.admin_fetch_review_articles(text)') is null then
+    create function public.admin_fetch_review_articles(admin_password text)
+    returns table (
+      author_id uuid,
+      body text,
+      cover_image_url text,
+      created_at timestamptz,
+      deck text,
+      id uuid,
+      published_at timestamptz,
+      section text,
+      slug text,
+      status text,
+      tags text[],
+      title text,
+      updated_at timestamptz,
+      author_display_name text,
+      author_designation text,
+      author_avatar_url text,
+      author_username text
+    )
+    language sql
+    stable
+    security definer
+    set search_path = public
+    as $function$
+      select
+        articles.author_id,
+        articles.body,
+        articles.cover_image_url,
+        articles.created_at,
+        articles.deck,
+        articles.id,
+        articles.published_at,
+        articles.section,
+        articles.slug,
+        articles.status,
+        articles.tags,
+        articles.title,
+        articles.updated_at,
+        profiles.display_name as author_display_name,
+        profiles.designation as author_designation,
+        profiles.avatar_url as author_avatar_url,
+        profiles.username as author_username
+      from public.articles
+      left join public.profiles
+        on profiles.id = articles.author_id
+      where public.is_hardcoded_admin(admin_password)
+        and articles.status in ('pending_review', 'published', 'rejected')
+      order by articles.created_at desc;
+    $function$;
   end if;
+end $$;
 
-  if next_status not in ('published', 'rejected') then
-    raise exception 'Invalid review status';
+do $$
+begin
+  if to_regprocedure('public.admin_update_article_review_status(text, uuid, text)') is null then
+    create function public.admin_update_article_review_status(
+      admin_password text,
+      article_id uuid,
+      next_status text
+    )
+    returns table (
+      author_id uuid,
+      body text,
+      cover_image_url text,
+      created_at timestamptz,
+      deck text,
+      id uuid,
+      published_at timestamptz,
+      section text,
+      slug text,
+      status text,
+      tags text[],
+      title text,
+      updated_at timestamptz,
+      author_display_name text,
+      author_designation text,
+      author_avatar_url text,
+      author_username text
+    )
+    language plpgsql
+    security definer
+    set search_path = public
+    as $function$
+    begin
+      if not public.is_hardcoded_admin(admin_password) then
+        raise exception 'Invalid admin credentials';
+      end if;
+
+      if next_status not in ('published', 'rejected') then
+        raise exception 'Invalid review status';
+      end if;
+
+      update public.articles
+      set
+        status = next_status,
+        published_at = case
+          when next_status = 'published' then timezone('utc', now())
+          else null
+        end
+      where articles.id = article_id;
+
+      return query
+      select
+        articles.author_id,
+        articles.body,
+        articles.cover_image_url,
+        articles.created_at,
+        articles.deck,
+        articles.id,
+        articles.published_at,
+        articles.section,
+        articles.slug,
+        articles.status,
+        articles.tags,
+        articles.title,
+        articles.updated_at,
+        profiles.display_name as author_display_name,
+        profiles.designation as author_designation,
+        profiles.avatar_url as author_avatar_url,
+        profiles.username as author_username
+      from public.articles
+      left join public.profiles
+        on profiles.id = articles.author_id
+      where articles.id = article_id;
+    end;
+    $function$;
   end if;
-
-  update public.articles
-  set
-    status = next_status,
-    published_at = case
-      when next_status = 'published' then timezone('utc', now())
-      else null
-    end
-  where articles.id = article_id;
-
-  return query
-  select
-    articles.author_id,
-    articles.body,
-    articles.cover_image_url,
-    articles.created_at,
-    articles.deck,
-    articles.id,
-    articles.published_at,
-    articles.section,
-    articles.slug,
-    articles.status,
-    articles.tags,
-    articles.title,
-    articles.updated_at,
-    profiles.display_name as author_display_name,
-    profiles.designation as author_designation,
-    profiles.avatar_url as author_avatar_url,
-    profiles.username as author_username
-  from public.articles
-  left join public.profiles
-    on profiles.id = articles.author_id
-  where articles.id = article_id;
-end;
-$$;
+end $$;
 
 grant execute on function public.is_hardcoded_admin(text) to anon, authenticated;
 grant execute on function public.email_is_registered(text) to anon, authenticated;
