@@ -608,7 +608,7 @@ export async function updateArticleReviewStatus(
   const { data, error } = await supabase.functions.invoke<{
     article: AdminReviewArticleRow
     email_delivery?: ReviewEmailDelivery
-  }>('send-article-review-email', {
+  }>('clever-handler', {
     body: {
       admin_password: HARDCODED_ADMIN_PASSWORD,
       article_id: articleId,

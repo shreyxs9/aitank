@@ -1,2 +1,2 @@
-[functions.send-article-review-email]
+[functions.clever-handler]
 verify_jwt = false
