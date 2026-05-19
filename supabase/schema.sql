@@ -120,6 +120,27 @@ as $$
   );
 $$;
 
+create or replace function public.email_registration_status(email_to_check text)
+returns text
+language sql
+stable
+security definer
+set search_path = public, auth
+as $$
+  select coalesce(
+    (
+      select case
+        when email_confirmed_at is null then 'unconfirmed'
+        else 'confirmed'
+      end
+      from auth.users
+      where lower(email) = lower(trim(email_to_check))
+      limit 1
+    ),
+    'not_registered'
+  );
+$$;
+
 do $$
 begin
   if to_regprocedure('public.admin_fetch_review_articles(text)') is null then
@@ -255,6 +276,7 @@ end $$;
 
 grant execute on function public.is_hardcoded_admin(text) to anon, authenticated;
 grant execute on function public.email_is_registered(text) to anon, authenticated;
+grant execute on function public.email_registration_status(text) to anon, authenticated;
 grant execute on function public.admin_fetch_review_articles(text) to anon, authenticated;
 grant execute on function public.admin_update_article_review_status(text, uuid, text) to anon, authenticated;
 

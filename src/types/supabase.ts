@@ -117,6 +117,12 @@ export interface Database {
         }
         Returns: boolean
       }
+      email_registration_status: {
+        Args: {
+          email_to_check: string
+        }
+        Returns: 'not_registered' | 'unconfirmed' | 'confirmed'
+      }
       admin_fetch_review_articles: {
         Args: {
           admin_password: string

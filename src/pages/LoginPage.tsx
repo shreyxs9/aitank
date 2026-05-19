@@ -18,8 +18,11 @@ import {
 import { updateProfileDetails, uploadProfilePicture } from '../lib/communityArticles'
 
 type AuthMode = 'login' | 'signup'
+type EmailRegistrationStatus = 'not_registered' | 'unconfirmed' | 'confirmed'
 
 const duplicateEmailMessage = 'Email already exists, please try another email ID'
+const unconfirmedEmailMessage =
+  'This email is already signed up but not confirmed. Check your inbox or resend the confirmation email.'
 
 function getEmailCheckErrorMessage(error: { code?: string; message?: string }) {
   if (error.code === 'PGRST202') {
@@ -27,6 +30,12 @@ function getEmailCheckErrorMessage(error: { code?: string; message?: string }) {
   }
 
   return error.message || 'Could not validate this email address.'
+}
+
+function isEmailNotConfirmedError(error: { code?: string; message?: string }) {
+  const message = error.message?.toLowerCase() ?? ''
+
+  return error.code === 'email_not_confirmed' || message.includes('email not confirmed')
 }
 
 export function LoginPage() {
@@ -116,13 +125,19 @@ export function LoginPage() {
         })
 
         if (signInError) {
+          if (isEmailNotConfirmedError(signInError)) {
+            setPendingConfirmationEmail(normalizedEmail)
+            setMessage(unconfirmedEmailMessage)
+            return
+          }
+
           throw signInError
         }
 
         setMessage('Signed in. Redirecting...')
       } else {
-        const { data: isEmailRegistered, error: emailCheckError } = await supabase.rpc(
-          'email_is_registered',
+        const { data: emailRegistrationStatus, error: emailCheckError } = await supabase.rpc(
+          'email_registration_status',
           {
             email_to_check: normalizedEmail,
           },
@@ -132,7 +147,13 @@ export function LoginPage() {
           throw new Error(getEmailCheckErrorMessage(emailCheckError))
         }
 
-        if (isEmailRegistered) {
+        if ((emailRegistrationStatus as EmailRegistrationStatus | null) === 'unconfirmed') {
+          setPendingConfirmationEmail(normalizedEmail)
+          setMessage(unconfirmedEmailMessage)
+          return
+        }
+
+        if ((emailRegistrationStatus as EmailRegistrationStatus | null) === 'confirmed') {
           setError(duplicateEmailMessage)
           return
         }
